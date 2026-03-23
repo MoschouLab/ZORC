@@ -1,0 +1,103 @@
+================================================================================
+ZORC — Isoform Mapping Report
+Script: 02_map_isoforms.py
+Generated: 2026-03-23 14:30:57
+================================================================================
+
+INPUT
+-----
+  Coregulon genes : 1,510  (positives=889, negatives=621)
+  rMATS NS dir    : ~/Documents/TRIP-isoform-lncoding-pipeline/04_results/05c_rmats/NS
+  rMATS HS dir    : ~/Documents/TRIP-isoform-lncoding-pipeline/04_results/05c_rmats/HS
+  GTF             : ~/Documents/TRIP-isoform-lncoding-pipeline/05_reference/Arabidopsis_thaliana.TAIR10.59.gtf
+
+ISOFORM ASSIGNMENT STRATEGY
+----------------------------
+  Strategy A — rMATS-guided (positives with matching event):
+    SE   : transcript containing the skipped exon
+    RI   : transcript where retained intron region is exonic
+    A3SS : transcript containing the long exon (long isoform)
+    A5SS : transcript containing the long exon (long isoform)
+    MXE  : transcript containing either mutually exclusive exon
+    Priority: HS > NS; highest |ΔΨ| event selected first
+
+  Strategy B — Canonical fallback:
+    Ensembl_canonical + protein_coding > canonical > most exons
+
+RESULTS
+-------
+  rMATS-guided assignments : 303
+  Canonical fallback       : 1,201
+  No transcript found      : 0
+  Missing transcript_id    : 0
+
+  Method breakdown:
+    canonical_fallback                           : 1,201
+    rmats_RI_overlap                             : 79
+    no_transcript_found                          : 68
+    dropped_no_gtf_transcript                    : 68
+    rmats_A3SS_overlap                           : 38
+    rmats_A3SS_overlap_2candidates               : 28
+    rmats_SE_overlap                             : 22
+    rmats_A5SS_overlap_2candidates               : 20
+    rmats_A3SS_overlap_3candidates               : 20
+    rmats_A5SS_overlap_3candidates               : 16
+    rmats_SE_overlap_2candidates                 : 14
+    rmats_A5SS_overlap                           : 12
+    rmats_RI_overlap_2candidates                 : 12
+    rmats_A3SS_overlap_4candidates               : 9
+    rmats_SE_overlap_3candidates                 : 6
+    rmats_SE_overlap_4candidates                 : 4
+    rmats_A3SS_overlap_5candidates               : 4
+    rmats_A5SS_overlap_6candidates               : 3
+    rmats_A5SS_overlap_4candidates               : 3
+    rmats_A5SS_overlap_5candidates               : 3
+    rmats_SE_overlap_5candidates                 : 2
+    rmats_RI_overlap_3candidates                 : 2
+    rmats_A3SS_overlap_6candidates               : 2
+    rmats_SE_overlap_6candidates                 : 1
+    rmats_A5SS_overlap_8candidates               : 1
+    rmats_A3SS_overlap_7candidates               : 1
+    rmats_RI_overlap_5candidates                 : 1
+
+  Transcript biotype distribution (top 10):
+    protein_coding                          : 1,466
+    tRNA                                    : 19
+    lncRNA                                  : 9
+    snoRNA                                  : 5
+    miRNA                                   : 4
+    ncRNA                                   : 4
+    snRNA                                   : 2
+    nontranslating_CDS                      : 1
+
+  Positives with rMATS-guided isoform: 307 / 889
+
+  Event type breakdown (rMATS-guided only):
+    A3SS      : 102
+    RI        : 94
+    A5SS      : 60
+    SE        : 51
+
+  Sample assignments (first 15 genes):
+  geneID         transcript_id      source                              biotype
+  -------------------------------------------------------------------------------------
+  AT1G08370      AT1G08370.1        canonical_fallback                  protein_coding
+  AT5G23010      AT5G23010.3        rmats_RI_overlap                    protein_coding
+  AT5G14200      AT5G14200.3        rmats_RI_overlap                    protein_coding
+  AT3G58990      AT3G58990.1        canonical_fallback                  protein_coding
+  AT1G12200      AT1G12200.2        rmats_RI_overlap                    protein_coding
+  AT1G09590      AT1G09590.1        canonical_fallback                  protein_coding
+  AT1G68660      AT1G68660.1        rmats_RI_overlap                    protein_coding
+  AT3G11500      AT3G11500.2        canonical_fallback                  protein_coding
+  AT2G47380      AT2G47380.2        canonical_fallback                  protein_coding
+  AT1G74090      AT1G74090.1        canonical_fallback                  protein_coding
+  AT5G04230      AT5G04230.2        canonical_fallback                  protein_coding
+  AT4G12390      AT4G12390.1        canonical_fallback                  protein_coding
+  AT3G52040      AT3G52040.1        canonical_fallback                  protein_coding
+  AT1G11530      AT1G11530.1        canonical_fallback                  protein_coding
+  AT1G27130      AT1G27130.1        canonical_fallback                  protein_coding
+
+OUTPUT: data/processed/02_zorc_isoform_map.csv
+================================================================================
+END OF REPORT
+================================================================================
