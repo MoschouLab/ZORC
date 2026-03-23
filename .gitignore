@@ -1,0 +1,19 @@
+# Raw input data (third-party, not redistributed)
+data/raw/
+
+# Large intermediate files
+data/processed/*.fa
+data/processed/*.fasta
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# Conda env (referenced, not stored)
+envs/*.yml.bak
+
+# Editor
+.vscode/
+*.swp
