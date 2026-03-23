@@ -1,0 +1,24 @@
+name: zorc_pipeline
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.11
+  - pandas>=2.1
+  - openpyxl>=3.1
+  - biopython>=1.83
+  - pyranges>=0.0.129
+  - pyfaidx>=0.8
+  - scikit-learn>=1.4
+  - shap>=0.45
+  - viennarna>=2.6          # RNAfold for RNA secondary structure features
+  - cd-hit>=4.8             # anti-leakage sequence clustering
+  - matplotlib>=3.8
+  - seaborn>=0.13
+  - pyyaml>=6.0
+  - tqdm>=4.66
+  - jupyterlab>=4.0
+  - pip
+  - pip:
+      - pydeseq2            # optional, for DE context

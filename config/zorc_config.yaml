@@ -1,0 +1,50 @@
+project_dir: ~/Documents/ZORC
+data:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  results_dir: results
+  logs_dir: logs
+input_files:
+  apeal_excel: data/raw/EMBOJ-2022-111885_SourceFile1_.xlsx
+  apeal_sheet: in
+  trip_excel: data/raw/tpc_23_01160Supplemental_Data_Sets_1XXX10.xlsx
+  trip_sheet: Suppl. Data set 2
+  trip_header_rows: 4
+reference:
+  gtf: ~/Documents/TRIP-isoform-lncoding-pipeline/05_reference/Arabidopsis_thaliana.TAIR10.59.gtf
+  genome_fasta: ~/Documents/TRIP-isoform-lncoding-pipeline/05_reference/Arabidopsis_thaliana.TAIR10.dna.toplevel.fa
+  rmats_ns_dir: ~/Documents/TRIP-isoform-lncoding-pipeline/04_results/05c_rmats/NS
+  rmats_hs_dir: ~/Documents/TRIP-isoform-lncoding-pipeline/04_results/05c_rmats/HS
+coregulon:
+  protein_enrichment_threshold: 0.0
+  conflict_resolution: strongest
+  rna_min_abs_log2fc: 0.0
+classes:
+  positive_label: 1
+  negative_label: 0
+bioemu_tiers:
+  tier1_max_idr: 10.0
+  tier2_max_idr: 30.0
+  tier2_n_conformations: 50
+  tier3_n_conformations: 100
+ml:
+  cdhit_identity_threshold: 0.4
+  train_fraction: 0.7
+  val_fraction: 0.15
+  test_fraction: 0.15
+  random_seed: 42
+  rf_n_estimators: 500
+  rf_class_weight: balanced
+outputs:
+  coregulon_list: data/processed/01_zorc_coregulon_list.csv
+  coregulon_report: logs/01_coregulon_build_report.txt
+  positives_fasta_mrna: data/processed/02_positives_mrna.fa
+  positives_fasta_protein: data/processed/02_positives_protein.fa
+  negatives_fasta_mrna: data/processed/02_negatives_mrna.fa
+  negatives_fasta_protein: data/processed/02_negatives_protein.fa
+  aiupred_results: data/processed/05_aiupred_idr_summary.csv
+  feature_matrix: data/processed/08_zorc_feature_matrix.csv
+  rf_model: results/09_zorc_rf_model.pkl
+  shap_values: results/09_zorc_shap_values.csv
+  isoform_map: data/processed/02_zorc_isoform_map.csv
+  isoform_map_report: logs/02_isoform_map_report.txt

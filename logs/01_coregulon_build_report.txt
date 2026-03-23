@@ -1,0 +1,94 @@
+
+================================================================================
+ZORC — Coregulon Build Report
+Script: 01_build_coregulon.py
+Generated: 2026-03-23 14:09:12
+Config: config/zorc_config.yaml
+================================================================================
+
+PARAMETERS
+----------
+Protein enrichment threshold : log2FC >= 0.0 in ANY of (AP_NS, AP_HS, PDL_NS, PDL_HS)
+Conflict resolution strategy : strongest
+RNA min abs log2FC           : 0.0
+
+INPUT SOURCES
+-------------
+APEAL proteomics : data/raw/EMBOJ-2022-111885_SourceFile1_.xlsx
+  Sheet          : in
+  Reference      : Liu C, Mentzelopoulou A et al. EMBO J. 2023;42(9):e111885.
+                   doi:10.15252/embj.2022111885
+
+T-RIP RNA lists  : data/raw/tpc_23_01160Supplemental_Data_Sets_1XXX10.xlsx
+  Sheet          : Suppl. Data set 2
+  Reference      : Liu et al. 2024, Plant Cell. Suppl. Data Set 2.
+                   doi:10.1093/plcell/koae015
+
+RESULTS SUMMARY
+---------------
+Total genes in coregulon : 1,572
+Positives (class=1)      : 884
+  - Enriched NS only     : 193
+  - Enriched HS only     : 600
+  - Enriched in both     : 91
+Negatives (class=0)      : 688
+Class ratio (neg:pos)    : 1:0.78
+Conflicts resolved       : 10
+
+BIOLOGICAL INTERPRETATION
+-------------------------
+Positives represent mRNAs that are:
+  (1) Enriched in DCP1-TurboID pulldowns (P-body co-enrichment in T-RIP)
+  (2) Whose gene product is also detected with log2FC >= 0.0 in at least
+      one APEAL condition (AP or PDL, NS or HS).
+This "coregulon" criterion captures cogulate mRNA-protein pairs that are
+jointly present in P-bodies under at least one stress condition.
+
+Negatives represent mRNAs actively depleted from P-bodies, serving as
+true negative examples for the ZIP-CODE prediction model.
+
+IMPORTANT — Isoform vs canonical protein:
+  The AGI code from APEAL is used ONLY as a matching key. Downstream
+  sequence features (P2–P7) will use the specific ISOFORM sequence
+  identified in T-RIP, not the canonical protein sequence. See config.yaml.
+
+CONFLICT RESOLUTIONS (10 genes)
+----------------------------------------
+    AT1G05680: kept_as_negative (dep=1.53 > enr=1.28)
+    AT4G15790: kept_as_negative (dep=1.47 > enr=1.45)
+    AT5G42765: kept_as_positive (enr=1.68 > dep=1.52)
+    AT1G61570: kept_as_negative (dep=2.14 > enr=1.17)
+    AT5G18100: kept_as_positive (enr=2.08 > dep=1.51)
+    AT2G37540: kept_as_positive (enr=1.51 > dep=1.07)
+    AT5G64480: kept_as_positive (enr=1.35 > dep=1.27)
+    AT5G01210: kept_as_negative (dep=4.96 > enr=2.71)
+    AT5G02120: kept_as_positive (enr=1.54 > dep=1.43)
+    AT4G36910: kept_as_positive (enr=1.50 > dep=1.17)
+
+OUTPUT
+------
+Coregulon list: data/processed/01_zorc_coregulon_list.csv
+
+Columns:
+  geneID              - AGI locus identifier (TAIR10)
+  description_rna     - gene description from T-RIP dataset
+  description_prot    - protein description from APEAL dataset
+  class               - 1=positive (enriched), 0=negative (depleted)
+  condition           - NS / HS / both / depleted
+  enriched_NS_RNA     - bool: in T-RIP enriched NS list
+  enriched_HS_RNA     - bool: in T-RIP enriched HS list
+  depleted_NS_RNA     - bool: in T-RIP depleted NS list
+  depleted_HS_RNA     - bool: in T-RIP depleted HS list
+  rna_log2FC_NS       - log2FC DCP1/GFP in NS (T-RIP)
+  rna_log2FC_HS       - log2FC DCP1/GFP in HS (T-RIP)
+  strongest_rna_log2fc- max(|log2FC_NS|, |log2FC_HS|)
+  log2FC_AP_NS        - log2FC DCP1/GFP in AP NS (APEAL)
+  log2FC_AP_HS        - log2FC DCP1/GFP in AP HS (APEAL)
+  log2FC_PDL_NS       - log2FC DCP1/GFP in PDL NS (APEAL)
+  log2FC_PDL_HS       - log2FC DCP1/GFP in PDL HS (APEAL)
+  protein_enriched    - bool: protein_log2FC >= 0.0 in any APEAL condition
+  conflict_resolved   - bool: gene appeared in both enriched and depleted lists
+
+================================================================================
+END OF REPORT
+================================================================================
