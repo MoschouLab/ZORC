@@ -1,0 +1,68 @@
+================================================================================
+ZORC — Sequence Fetch QC Report
+Script: 03_fetch_sequences.py
+Generated: 2026-03-23 15:39:39
+================================================================================
+
+SEQUENCE STATISTICS
+-------------------
+  Total sequences processed : 1,501
+  QC pass                   : 1,456
+  QC fail                   : 45
+    No CDS (non-coding)     : 44
+    Short protein (<30 aa)  : 1
+    Internal stop codon     : 0
+  Positives with QC fail    : 1
+  Negatives with QC fail    : 44
+
+  Note: QC-fail sequences ARE included in output FASTAs
+  with a |QC_FAIL:reason suffix. They are flagged here for
+  downstream filtering decisions (e.g. exclude no_CDS from
+  protein feature extraction but keep for RNA features).
+
+mRNA LENGTH DISTRIBUTION
+------------------------
+  Positives: n=880  median=1550 nt  mean=1730 nt  min=396  max=13193
+  Negatives: n=621  median=1038 nt  mean=1147 nt  min=71  max=5799
+
+PROTEIN LENGTH DISTRIBUTION
+---------------------------
+  Positives: n=879  median=337 aa  mean=396 aa  min=51  max=4216
+  Negatives: n=578  median=203 aa  mean=249 aa  min=25  max=1450
+
+QC FAILURES (first 30)
+----------------------------------------
+  AT1G18382      AT1G18382.1        class=0  flag=no_CDS  prot_len=0
+  AT1G28950      AT1G28950.1        class=0  flag=no_CDS  prot_len=0
+  AT1G76878      AT1G76878.1        class=0  flag=no_CDS  prot_len=0
+  AT5G07152      AT5G07152.1        class=0  flag=no_CDS  prot_len=0
+  AT5G08210      at5g08210          class=0  flag=no_CDS  prot_len=0
+  AT5G09585      AT5G09585.1        class=0  flag=no_CDS  prot_len=0
+  AT5G43403      AT5G43403.1        class=0  flag=no_CDS  prot_len=0
+  AT5G61455      AT5G61455.1        class=0  flag=no_CDS  prot_len=0
+  AT3G01316      AT3G01316.1        class=0  flag=no_CDS  prot_len=0
+  AT3G47347      AT3G47347.1        class=0  flag=no_CDS  prot_len=0
+  AT3G48115      AT3G48115.2        class=0  flag=no_CDS  prot_len=0
+  AT3G50825      AT3G50825.1        class=0  flag=no_CDS  prot_len=0
+  AT3G52072      AT3G52072.2        class=0  flag=no_CDS  prot_len=0
+  AT3G52565      AT3G52565.1        class=0  flag=no_CDS  prot_len=0
+  AT3G55485      AT3G55485.1        class=0  flag=no_CDS  prot_len=0
+  AT3G56020      AT3G56020.1        class=0  flag=short_protein  prot_len=25
+  AT3G58193      AT3G58193.1        class=0  flag=no_CDS  prot_len=0
+  AT3G59068      AT3G59068.1        class=0  flag=no_CDS  prot_len=0
+  AT2G05765      AT2G05765.1        class=0  flag=no_CDS  prot_len=0
+  AT2G05812      AT2G05812.2        class=0  flag=no_CDS  prot_len=0
+  AT2G06210      AT2G06210.1        class=1  flag=no_CDS  prot_len=0
+  AT2G07743      AT2G07743.1        class=0  flag=no_CDS  prot_len=0
+  AT2G07746      AT2G07746.1        class=0  flag=no_CDS  prot_len=0
+  AT2G07748      AT2G07748.1        class=0  flag=no_CDS  prot_len=0
+  AT2G07753      AT2G07753.1        class=0  flag=no_CDS  prot_len=0
+  AT2G07755      AT2G07755.1        class=0  flag=no_CDS  prot_len=0
+  AT2G07792      AT2G07792.1        class=0  flag=no_CDS  prot_len=0
+  AT2G07793      AT2G07793.1        class=0  flag=no_CDS  prot_len=0
+  AT2G07794      AT2G07794.1        class=0  flag=no_CDS  prot_len=0
+  AT2G07756      AT2G07756.1        class=0  flag=no_CDS  prot_len=0
+
+================================================================================
+END OF REPORT
+================================================================================

@@ -48,3 +48,12 @@ outputs:
   shap_values: results/09_zorc_shap_values.csv
   isoform_map: data/processed/02_zorc_isoform_map.csv
   isoform_map_report: logs/02_isoform_map_report.txt
+  sequences_dir: data/processed/sequences
+  all_mrna_fa: data/processed/sequences/all_mrna.fa
+  all_protein_fa: data/processed/sequences/all_protein.fa
+  positives_mrna_fa: data/processed/sequences/positives_mrna.fa
+  positives_protein_fa: data/processed/sequences/positives_protein.fa
+  negatives_mrna_fa: data/processed/sequences/negatives_mrna.fa
+  negatives_protein_fa: data/processed/sequences/negatives_protein.fa
+  sequence_qc_report: logs/03_sequence_qc_report.txt
+  sequence_manifest: data/processed/03_sequence_manifest.csv
