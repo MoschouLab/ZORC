@@ -59,3 +59,8 @@ outputs:
   sequence_manifest: data/processed/03_sequence_manifest.csv
   aiupred_report: logs/05_aiupred_report.txt
   bioemu_tier_list: data/processed/05_bioemu_tier_assignments.csv
+  bioemu_dir: data/processed/bioemu
+  bioemu_checkpoint: data/processed/bioemu/checkpoint.json
+  bioemu_report: logs/06_bioemu_report.txt
+  rna_features: data/processed/04_rna_features.csv
+  rna_features_report: logs/04_rna_features_report.txt

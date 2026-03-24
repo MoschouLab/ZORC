@@ -1,0 +1,25 @@
+================================================================================
+ZORC — RNA Feature Engineering Report
+Script: 04_rna_features.py
+Generated: 2026-03-24 16:26:02
+================================================================================
+
+FEATURES COMPUTED
+  Nucleotide composition (fA, fU, fG, fC, au_content, gc_content)
+  Dinucleotide frequencies (16 features: AA, AU, ...)
+  mRNA length
+  UTR lengths (5'UTR, 3'UTR, CDS) from GTF
+  3'UTR AU content
+  m6A motifs: RRACH, AAACH (count + per_kb)
+  NMD proxies: long_3utr, ptc_proxy
+  RNAfold: computed
+    MFE, MFE/nt, ensemble_fe, frac_paired, n_stemloops
+
+TOTAL SEQUENCES: 1,501
+  Positives: 880
+  Negatives: 621
+  RNAfold computed: 1,433
+
+================================================================================
+END OF REPORT
+================================================================================
