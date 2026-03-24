@@ -1,0 +1,163 @@
+{
+  "AT1G01230_AT1G01230.1": {
+    "status": "completed",
+    "timestamp": "2026-03-24T14:53:30.782084",
+    "tier": 2,
+    "protein_length": 157,
+    "idr_percent": 12.74,
+    "n_conformations": 48,
+    "runtime_sec": 103.2,
+    "error": null,
+    "completed_at": "2026-03-24T14:55:14.003498"
+  },
+  "AT1G01300_AT1G01300.1": {
+    "status": "completed",
+    "timestamp": "2026-03-24T14:55:14.004097",
+    "tier": 2,
+    "protein_length": 485,
+    "idr_percent": 18.97,
+    "n_conformations": 21,
+    "runtime_sec": 662.9,
+    "error": null,
+    "completed_at": "2026-03-24T15:06:16.860719"
+  },
+  "AT1G01450_AT1G01450.1": {
+    "status": "completed",
+    "timestamp": "2026-03-24T15:06:16.861825",
+    "tier": 2,
+    "protein_length": 470,
+    "idr_percent": 14.04,
+    "n_conformations": 17,
+    "runtime_sec": 678.4,
+    "error": null,
+    "completed_at": "2026-03-24T15:17:35.244606"
+  },
+  "AT1G01510_AT1G01510.1": {
+    "status": "completed",
+    "timestamp": "2026-03-24T15:30:37.011523",
+    "tier": 2,
+    "protein_length": 636,
+    "idr_percent": 29.87,
+    "n_conformations": 10,
+    "runtime_sec": 1058.8,
+    "error": null,
+    "completed_at": "2026-03-24T15:48:15.803285"
+  },
+  "AT1G02100_AT1G02100.1": {
+    "status": "completed",
+    "timestamp": "2026-03-24T15:48:15.804267",
+    "tier": 2,
+    "protein_length": 332,
+    "idr_percent": 11.45,
+    "n_conformations": 44,
+    "runtime_sec": 360.2,
+    "error": null,
+    "completed_at": "2026-03-24T15:54:15.988278"
+  },
+  "AT1G02130_AT1G02130.1": {
+    "status": "completed",
+    "timestamp": "2026-03-24T15:54:15.989241",
+    "tier": 2,
+    "protein_length": 203,
+    "idr_percent": 18.23,
+    "n_conformations": 37,
+    "runtime_sec": 208.6,
+    "error": null,
+    "completed_at": "2026-03-24T15:57:44.596623"
+  },
+  "AT1G04340_AT1G04340.1": {
+    "status": "completed",
+    "timestamp": "2026-03-24T15:57:44.597985",
+    "tier": 2,
+    "protein_length": 159,
+    "idr_percent": 14.47,
+    "n_conformations": 47,
+    "runtime_sec": 138.7,
+    "error": null,
+    "completed_at": "2026-03-24T16:00:03.299247"
+  },
+  "AT1G04530_AT1G04530.1": {
+    "status": "completed",
+    "timestamp": "2026-03-24T16:00:03.300078",
+    "tier": 2,
+    "protein_length": 310,
+    "idr_percent": 25.81,
+    "n_conformations": 20,
+    "runtime_sec": 354.5,
+    "error": null,
+    "completed_at": "2026-03-24T16:05:57.806778"
+  },
+  "AT1G05210_AT1G05210.1": {
+    "status": "completed",
+    "timestamp": "2026-03-24T16:05:57.807953",
+    "tier": 2,
+    "protein_length": 168,
+    "idr_percent": 16.07,
+    "n_conformations": 49,
+    "runtime_sec": 135.0,
+    "error": null,
+    "completed_at": "2026-03-24T16:08:12.838217"
+  },
+  "AT1G05350_AT1G05350.1": {
+    "status": "completed",
+    "timestamp": "2026-03-24T16:08:12.839272",
+    "tier": 2,
+    "protein_length": 431,
+    "idr_percent": 25.52,
+    "n_conformations": 40,
+    "runtime_sec": 542.4,
+    "error": null,
+    "completed_at": "2026-03-24T16:17:15.231994"
+  },
+  "AT1G05410_AT1G05410.1": {
+    "status": "completed",
+    "timestamp": "2026-03-24T16:17:15.232842",
+    "tier": 2,
+    "protein_length": 471,
+    "idr_percent": 22.29,
+    "n_conformations": 31,
+    "runtime_sec": 617.8,
+    "error": null,
+    "completed_at": "2026-03-24T16:27:33.081772"
+  },
+  "AT1G05790_AT1G05790.3": {
+    "status": "completed",
+    "timestamp": "2026-03-24T16:27:33.082956",
+    "tier": 2,
+    "protein_length": 722,
+    "idr_percent": 14.13,
+    "n_conformations": 28,
+    "runtime_sec": 1290.9,
+    "error": null,
+    "completed_at": "2026-03-24T16:49:03.982893"
+  },
+  "AT1G07660_AT1G07660.1": {
+    "status": "completed",
+    "timestamp": "2026-03-24T16:49:03.983684",
+    "tier": 2,
+    "protein_length": 103,
+    "idr_percent": 25.24,
+    "n_conformations": 47,
+    "runtime_sec": 67.2,
+    "error": null,
+    "completed_at": "2026-03-24T16:50:11.159986"
+  },
+  "AT1G08570_AT1G08570.1": {
+    "status": "completed",
+    "timestamp": "2026-03-24T16:50:11.160687",
+    "tier": 2,
+    "protein_length": 275,
+    "idr_percent": 19.64,
+    "n_conformations": 22,
+    "runtime_sec": 321.8,
+    "error": null,
+    "completed_at": "2026-03-24T16:55:32.949119"
+  },
+  "AT1G11320_AT1G11320.1": {
+    "status": "running",
+    "timestamp": "2026-03-24T16:55:32.950648",
+    "tier": 2,
+    "protein_length": 424,
+    "idr_percent": 11.56
+  }
+}

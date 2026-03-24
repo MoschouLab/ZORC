@@ -17,3 +17,12 @@ envs/*.yml.bak
 # Editor
 .vscode/
 *.swp
+
+# Large derived data files (regenerate with pipeline)
+data/processed/sequences/*.fa
+data/processed/sequences/*.gtf
+data/processed/bioemu/*/samples.xtc
+data/processed/bioemu/*/topology.pdb
+data/processed/bioemu/*_dp.ps
+
+# Keep: CSVs, manifests, logs, input FASTAs
