@@ -1,0 +1,30 @@
+================================================================================
+ZORC — AIUPred IDR Prediction Report
+Script: 05_aiupred_idr.py
+Generated: 2026-03-24 13:53:27
+================================================================================
+
+PARAMETERS
+  IDR threshold (score > 0.5) : AIUPred default
+  Tier 1 (AlphaFold2 only)    : IDR% < 10.0
+  Tier 2 (BioEmu 50 conf)     : IDR% 10.0 - 30.0
+  Tier 3 (BioEmu 100 conf)    : IDR% >= 30.0
+
+RESULTS
+  Total proteins              : 1,457
+  AIUPred computed            : 1,456
+  Skipped/failed              : 1
+
+TIER BREAKDOWN
+  Tier 1: 698 proteins
+  Tier 2: 328 proteins
+  Tier 3: 431 proteins
+  Total BioEmu conformations  : ~59,500
+
+IDR% DISTRIBUTION
+  Positives: median=10.2%  mean=23.4%  min=0.0%  max=100.0%
+  Negatives: median=12.4%  mean=24.3%  min=0.0%  max=100.0%
+
+================================================================================
+END OF REPORT
+================================================================================

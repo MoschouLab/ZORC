@@ -57,3 +57,5 @@ outputs:
   negatives_protein_fa: data/processed/sequences/negatives_protein.fa
   sequence_qc_report: logs/03_sequence_qc_report.txt
   sequence_manifest: data/processed/03_sequence_manifest.csv
+  aiupred_report: logs/05_aiupred_report.txt
+  bioemu_tier_list: data/processed/05_bioemu_tier_assignments.csv
