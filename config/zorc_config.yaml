@@ -64,3 +64,5 @@ outputs:
   bioemu_report: logs/06_bioemu_report.txt
   rna_features: data/processed/04_rna_features.csv
   rna_features_report: logs/04_rna_features_report.txt
+  protein_features: data/processed/07_protein_features.csv
+  protein_features_report: logs/07_protein_features_report.txt
