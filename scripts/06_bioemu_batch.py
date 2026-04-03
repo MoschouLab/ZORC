@@ -155,7 +155,8 @@ def protein_key(gene_id, tx_id):
 
 def run_bioemu_single(gene_id: str, tx_id: str, sequence: str,
                       n_samples: int, out_dir: Path,
-                      filter_samples: bool = True) -> dict:
+                      filter_samples: bool = True,
+                      timeout_sec: int = 3600) -> dict:
     """
     Run BioEmu for a single protein.
 
@@ -187,16 +188,25 @@ def run_bioemu_single(gene_id: str, tx_id: str, sequence: str,
                 cmd,
                 stdout=log_f,
                 stderr=subprocess.STDOUT,
-                timeout=3600,  # 1 hour max per protein
+                timeout=timeout_sec,
             )
         runtime = time.time() - t_start
 
         if result.returncode != 0:
+            # Detect known BioEmu bug: all conformations filtered as unphysical
+            # pathlib.with_suffix() crashes on '_unphysical.xtc' suffix
+            error_msg = f'exit_code={result.returncode}'
+            try:
+                log_content = open(log_path).read()
+                if "Invalid suffix '_unphysical.xtc'" in log_content:
+                    error_msg = 'unphysical_filter_bug'
+            except Exception:
+                pass
             return {
                 'success': False,
                 'n_conformations': 0,
                 'runtime_sec': runtime,
-                'error_msg': f'exit_code={result.returncode}',
+                'error_msg': error_msg,
             }
 
         # Verify output files exist
@@ -224,8 +234,8 @@ def run_bioemu_single(gene_id: str, tx_id: str, sequence: str,
         return {
             'success': False,
             'n_conformations': 0,
-            'runtime_sec': 3600,
-            'error_msg': 'timeout_1h',
+            'runtime_sec': timeout_sec,
+            'error_msg': f'timeout_{timeout_sec//3600}h',
         }
     except Exception as e:
         return {
@@ -291,6 +301,10 @@ def main():
                         help='Pass --filter_samples=False to BioEmu (use for IDR>90%%)')
     parser.add_argument('--retry-failed', action='store_true',
                         help='Retry previously failed proteins')
+    parser.add_argument('--timeout', type=int, default=3600,
+                        help='Timeout per protein in seconds (default: 3600 = 1h)')
+    parser.add_argument('--error-filter', default=None,
+                        help='Only retry failures matching this error string')
     parser.add_argument('--status', action='store_true',
                         help='Show checkpoint status and exit')
     args = parser.parse_args()
@@ -387,6 +401,12 @@ def main():
         # Skip failed unless --retry-failed
         if checkpoint.get(pkey, {}).get('status') == 'failed' and not args.retry_failed:
             continue
+        # If --error-filter set, only retry failures matching that error string
+        if (args.retry_failed and args.error_filter and
+                checkpoint.get(pkey, {}).get('status') == 'failed'):
+            err = checkpoint.get(pkey, {}).get('error', '')
+            if args.error_filter not in err:
+                continue
 
         # Get sequence
         seq = prot_seqs.get(tx_id)
@@ -427,7 +447,8 @@ def main():
         # Run BioEmu
         run_result = run_bioemu_single(
             gene_id, tx_id, seq, n_samples, out_dir,
-            filter_samples=not args.no_filter
+            filter_samples=not args.no_filter,
+            timeout_sec=args.timeout,
         )
 
         # Update checkpoint
