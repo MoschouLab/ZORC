@@ -136,9 +136,9 @@ def parse_cdhit_clusters(clstr_path: str) -> dict:
                 current_cluster += 1
             else:
                 # Extract sequence ID: ">seq_id..."
-                m = re.search(r'>([^\s\.]+)', line)
+                m = re.search(r'>([^\s]+)', line)
                 if m:
-                    seq_id = m.group(1)
+                    seq_id = m.group(1).rstrip('.')
                     seq_to_cluster[seq_id] = current_cluster
 
     return seq_to_cluster
@@ -286,16 +286,18 @@ def main():
 
     df_rna  = pd.read_csv(proj / cfg['outputs']['rna_features'])
     df_prot = pd.read_csv(proj / cfg['outputs']['protein_features'])
+    df_idr  = pd.read_csv(proj / cfg['outputs']['aiupred_results'])
     df_iso  = pd.read_csv(proj / cfg['outputs']['isoform_map'])[
         ['geneID', 'transcript_id', 'isoform_source', 'event_type']
     ]
 
     print(f"  RNA features:     {len(df_rna):,} rows, {len(df_rna.columns)} cols")
     print(f"  Protein features: {len(df_prot):,} rows, {len(df_prot.columns)} cols")
+    print(f"  IDR summary:      {len(df_idr):,} rows")
 
     # Standardise geneID + transcript_id types
-    for df in [df_rna, df_prot, df_iso]:
-        df['geneID']       = df['geneID'].astype(str).str.strip()
+    for df in [df_rna, df_prot, df_iso, df_idr]:
+        df['geneID']        = df['geneID'].astype(str).str.strip()
         df['transcript_id'] = df['transcript_id'].astype(str).str.strip()
 
     # --- Merge ---------------------------------------------------------------
@@ -306,16 +308,32 @@ def main():
                         'qc_fail'] + [c for c in RNA_FEATURES if c in df_rna.columns]].copy()
 
     # Protein features → merge on geneID + transcript_id
+    # Drop 'class' from df_prot to avoid class_x/class_y conflict
     prot_cols = ['geneID', 'transcript_id', 'bioemu_tier', 'bioemu_status',
                  'feature_source'] + [c for c in PROTEIN_FEATURES
-                                       if c in df_prot.columns]
+                                       if c in df_prot.columns
+                                       and c not in ('idr_percent','mean_disorder',
+                                                     'max_disorder_window',
+                                                     'n_idr_regions',
+                                                     'longest_idr_region')]
+    prot_merge_cols = [c for c in prot_cols if c in df_prot.columns
+                       and c != 'class']
     df_merge = df_merge.merge(
-        df_prot[[c for c in prot_cols if c in df_prot.columns]],
+        df_prot[prot_merge_cols],
         on=['geneID', 'transcript_id'], how='left'
     )
 
+    # IDR features — load directly from P5 output (authoritative source)
+    idr_cols = ['geneID', 'transcript_id', 'idr_percent', 'mean_disorder',
+                'max_disorder_window', 'n_idr_regions', 'longest_idr_region']
+    idr_merge = df_idr[[c for c in idr_cols if c in df_idr.columns]].copy()
+    df_merge = df_merge.merge(idr_merge, on=['geneID', 'transcript_id'], how='left')
+
     # Isoform metadata
     df_merge = df_merge.merge(df_iso, on=['geneID', 'transcript_id'], how='left')
+
+    # Ensure class is integer (not float/NaN) after merges
+    df_merge['class'] = pd.to_numeric(df_merge['class'], errors='coerce').fillna(-1).astype(int)
 
     print(f"  Merged: {len(df_merge):,} rows, {len(df_merge.columns)} cols")
     print(f"  Class distribution: pos={( df_merge['class']==1).sum():,}, "
@@ -364,13 +382,15 @@ def main():
                 # Remap to transcript_id
                 tx_clusters = {}
                 for header, cid in clusters.items():
-                    # Header format: GeneID|TranscriptID|...
-                    parts = header.split('|')
-                    tx_id = parts[1] if len(parts) > 1 else header
+                    clean = header.rstrip('.').strip()
+                    parts = clean.split('|')
+                    tx_id = parts[1].strip() if len(parts) >= 2 else clean
                     tx_clusters[tx_id] = cid
 
-                labels = dict(zip(df_merge['transcript_id'],
-                                  df_merge['class']))
+                labels = {str(tx): int(cls)
+                          for tx, cls in zip(df_merge['transcript_id'],
+                                             df_merge['class'])
+                          if int(cls) in (0, 1)}
                 seq_splits = assign_cluster_split(
                     tx_clusters, labels, train_f, val_f, seed
                 )

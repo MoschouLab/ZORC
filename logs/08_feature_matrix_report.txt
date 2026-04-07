@@ -1,0 +1,32 @@
+================================================================================
+ZORC — Feature Matrix Assembly Report
+Script: 08_feature_matrix.py
+Generated: 2026-04-06 11:23:14
+================================================================================
+
+DATASET: 1,510 samples, 59 features
+  Positives (class=1): 889
+  Negatives (class=0): 621
+
+SPLIT DISTRIBUTION
+  train: 1,064 (pos=629, neg=435)
+  val: 212 (pos=125, neg=87)
+  test: 234 (pos=135, neg=99)
+
+FEATURES WITH >5% MISSING
+  rmsf_mean                     : 49.5%
+  rmsf_std                      : 49.5%
+  rmsf_max                      : 49.5%
+  rmsf_nterm50                  : 49.5%
+  rmsf_cterm50                  : 49.5%
+  rg_mean                       : 49.5%
+  rg_std                        : 49.5%
+  rg_cv                         : 49.5%
+  contact_density               : 49.5%
+  packing_density               : 49.5%
+  sasa_per_residue              : 49.5%
+  pass_rate                     : 49.5%
+
+================================================================================
+END OF REPORT
+================================================================================

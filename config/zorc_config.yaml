@@ -66,3 +66,5 @@ outputs:
   rna_features_report: logs/04_rna_features_report.txt
   protein_features: data/processed/07_protein_features.csv
   protein_features_report: logs/07_protein_features_report.txt
+  split_assignments: data/processed/08_zorc_split_assignments.csv
+  feature_matrix_report: logs/08_feature_matrix_report.txt
