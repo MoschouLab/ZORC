@@ -35,6 +35,16 @@ ml:
   random_seed: 42
   rf_n_estimators: 500
   rf_class_weight: balanced
+xgboost:
+  n_estimators: 500
+  max_depth: 6
+  learning_rate: 0.05
+  min_child_weight: 5
+  subsample: 0.8
+  colsample_bytree: 0.8
+  early_stopping_rounds: 30
+  shap_background_n: 500
+  random_state: 42
 outputs:
   coregulon_list: data/processed/01_zorc_coregulon_list.csv
   coregulon_report: logs/01_coregulon_build_report.txt
@@ -70,3 +80,12 @@ outputs:
   feature_matrix_report: logs/08_feature_matrix_report.txt
   rf_report: logs/09_rf_report.txt
   rf_predictions: results/09_zorc_predictions.csv
+  xgb_model: results/09b_zorc_xgb_model.json
+  xgb_shap_values: results/09b_zorc_xgb_shap_values.csv
+  xgb_shap_importance: results/09b_zorc_xgb_shap_importance.csv
+  xgb_predictions: results/09b_zorc_xgb_predictions.csv
+  xgb_report: logs/09b_xgb_report.txt
+  hc_set: data/processed/colleague_high_confidence_set.csv
+xgboost_model_file: results/09b_zorc_xgb_model.json
+xgboost_shap_importance_file: results/09b_zorc_xgb_shap_importance.csv
+xgboost_predictions_file: results/09b_zorc_xgb_predictions.csv
