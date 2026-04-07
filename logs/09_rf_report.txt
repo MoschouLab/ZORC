@@ -1,0 +1,68 @@
+================================================================================
+ZORC — Random Forest Report
+Script: 09_random_forest.py
+Generated: 2026-04-07 10:03:33
+================================================================================
+
+MODEL CONFIGURATION
+  n_estimators : 500
+  class_weight : balanced
+  max_features : sqrt
+  Features     : 56
+  Imputation   : global median + has_bioemu flag
+
+EVALUATION METRICS
+
+  TRAIN (n=1064)
+    AUROC   : 1.0000
+    AUPRC   : 1.0000
+    F1 pos  : 0.9992
+    F1 neg  : 0.9989
+    F1 macro: 0.9990
+    TP=628  FP=0  TN=435  FN=1
+
+  VAL (n=212)
+    AUROC   : 0.7990
+    AUPRC   : 0.8312
+    F1 pos  : 0.8000
+    F1 neg  : 0.6494
+    F1 macro: 0.7247
+    TP=108  FP=37  TN=50  FN=17
+
+  TEST (n=234)
+    AUROC   : 0.7974
+    AUPRC   : 0.8469
+    F1 pos  : 0.7986
+    F1 neg  : 0.6778
+    F1 macro: 0.7382
+    TP=115  FP=38  TN=61  FN=20
+
+HIGH-CONFIDENCE VALIDATION
+  24/25 correct (96%)
+
+TOP 20 FEATURES (mean |SHAP|)
+  Rank  Feature                        Mean |SHAP|
+  1     mrna_length                    0.0389
+  2     cds_length                     0.0387
+  3     n_residues                     0.0243
+  4     di_CG                          0.0242
+  5     di_UA                          0.0229
+  6     utr3_au_content                0.0210
+  7     utr3_length                    0.0169
+  8     di_UG                          0.0150
+  9     utr5_length                    0.0146
+  10    utr5_fraction                  0.0136
+  11    cds_fraction                   0.0121
+  12    fU                             0.0114
+  13    mfe_per_nt                     0.0105
+  14    fG                             0.0102
+  15    di_CA                          0.0097
+  16    rrach_per_kb                   0.0088
+  17    di_UU                          0.0086
+  18    di_CU                          0.0083
+  19    di_AG                          0.0082
+  20    au_content                     0.0070
+
+================================================================================
+END OF REPORT
+================================================================================

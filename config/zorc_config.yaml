@@ -68,3 +68,5 @@ outputs:
   protein_features_report: logs/07_protein_features_report.txt
   split_assignments: data/processed/08_zorc_split_assignments.csv
   feature_matrix_report: logs/08_feature_matrix_report.txt
+  rf_report: logs/09_rf_report.txt
+  rf_predictions: results/09_zorc_predictions.csv
