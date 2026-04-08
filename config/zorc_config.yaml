@@ -27,6 +27,7 @@ bioemu_tiers:
   tier2_max_idr: 30.0
   tier2_n_conformations: 50
   tier3_n_conformations: 100
+  tier1_n_conformations: 100
 ml:
   cdhit_identity_threshold: 0.4
   train_fraction: 0.7
@@ -86,6 +87,8 @@ outputs:
   xgb_predictions: results/09b_zorc_xgb_predictions.csv
   xgb_report: logs/09b_xgb_report.txt
   hc_set: data/processed/colleague_high_confidence_set.csv
+  bioemu_checkpoint_tier1: data/processed/bioemu/checkpoint_tier1.json
+  bioemu_report_tier1: logs/06b_bioemu_tier1_report.txt
 xgboost_model_file: results/09b_zorc_xgb_model.json
 xgboost_shap_importance_file: results/09b_zorc_xgb_shap_importance.csv
 xgboost_predictions_file: results/09b_zorc_xgb_predictions.csv
