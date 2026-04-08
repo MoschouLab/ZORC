@@ -1,0 +1,12 @@
+ZORC Phase 9c — AF2 Recovery Report
+Timestamp: 2026-04-07 15:02:41
+
+Tier 1 total: 698
+Mapped to UniProt: 695
+PDBs downloaded: 692
+Features extracted OK: 692
+Proteins patched: 692
+AF2 static in P7 now: 695
+Still missing: 3
+
+Unmapped TAIR IDs:
