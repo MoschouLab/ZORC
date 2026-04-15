@@ -1,0 +1,76 @@
+ZORC Phase 9d — Feature Engineering Report
+Timestamp: 2026-04-15 11:32:10
+
+Engineered features: ['rmsf_nterm_cterm_ratio', 'packing_x_idr', 'rrach_per_cds_kb', 'utr3_au_x_length']
+
+RF  Val  AUROC=0.7969  AUPRC=0.8269  F1=0.7094
+RF  Test AUROC=0.7963  AUPRC=0.8431  F1=0.7229
+XGB Val  AUROC=0.8036  AUPRC=0.8302  F1=0.7294
+XGB Test AUROC=0.7811  AUPRC=0.8181  F1=0.7027
+
+RF  HC: 24/25
+XGB HC: 23/25
+
+RF Top 30 SHAP:
+   1  mrna_length                          0.0215
+   2  cds_length                           0.0203
+   3  di_CG                                0.0186
+   4  rrach_count                          0.0174
+   5  mfe                                  0.0166
+   6  di_UA                                0.0140
+   7  utr3_au_content                      0.0138
+   8  di_UG                                0.0134
+   9  n_residues                           0.0107
+  10  cds_fraction                         0.0100
+  11  utr3_length                          0.0090
+  12  rmsf_nterm50                         0.0087
+  13  rmsf_std                             0.0086
+  14  n_stemloops                          0.0086
+  15  rmsf_nterm_cterm_ratio               0.0084
+  16  utr3_au_x_length                     0.0083
+  17  utr5_length                          0.0080
+  18  utr5_fraction                        0.0079
+  19  rmsf_max                             0.0077
+  20  fG                                   0.0075
+  21  fU                                   0.0072
+  22  packing_density                      0.0069
+  23  di_CA                                0.0067
+  24  di_CU                                0.0062
+  25  di_AG                                0.0059
+  26  di_UU                                0.0059
+  27  au_content                           0.0058
+  28  mfe_per_nt                           0.0057
+  29  gc_content                           0.0055
+  30  mean_disorder                        0.0054
+
+XGB Top 30 SHAP:
+   1  mrna_length                          0.1540
+   2  di_CG                                0.1279
+   3  di_UG                                0.1257
+   4  rrach_count                          0.1254
+   5  utr3_au_content                      0.1243
+   6  di_UA                                0.1052
+   7  packing_density                      0.1045
+   8  cds_length                           0.0989
+   9  fU                                   0.0742
+  10  rmsf_nterm_cterm_ratio               0.0704
+  11  n_residues                           0.0702
+  12  mfe                                  0.0582
+  13  rmsf_nterm50                         0.0550
+  14  rmsf_max                             0.0452
+  15  fG                                   0.0427
+  16  di_UU                                0.0425
+  17  di_CA                                0.0421
+  18  utr3_au_x_length                     0.0418
+  19  n_stemloops_per_kb                   0.0402
+  20  rmsf_std                             0.0378
+  21  utr5_length                          0.0372
+  22  utr3_length                          0.0340
+  23  rmsf_mean                            0.0332
+  24  max_disorder_window                  0.0330
+  25  di_GU                                0.0325
+  26  mean_disorder                        0.0323
+  27  di_GC                                0.0300
+  28  sasa_per_residue                     0.0273
+  29  di_AG                                0.0258
+  30  utr5_fraction                        0.0257
