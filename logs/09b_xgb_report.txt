@@ -1,5 +1,5 @@
 ZORC Phase 9b — XGBoost Report
-Timestamp: 2026-04-07 13:46:05
+Timestamp: 2026-04-15 11:02:40
 
 XGBoost params:
   objective: binary:logistic
@@ -16,41 +16,41 @@ XGBoost params:
   tree_method: hist
   device: cuda
 
-Best round: 36
+Best round: 75
 
-Val  AUROC=0.7993  AUPRC=0.8252  F1-macro=0.7368
-Test AUROC=0.7835  AUPRC=0.8252  F1-macro=0.6936
+Val  AUROC=0.8001  AUPRC=0.8229  F1-macro=0.7271
+Test AUROC=0.7879  AUPRC=0.8317  F1-macro=0.6976
 
-HC validation: 21/25 (84%)
+HC validation: 23/25 (92%)
 
 Top 30 SHAP features:
-   1  di_CG                                0.1430
-   2  rrach_count                          0.1315
-   3  mrna_length                          0.1301
-   4  utr3_au_content                      0.1211
-   5  di_UA                                0.1089
-   6  di_UG                                0.1070
-   7  mfe                                  0.0798
-   8  cds_length                           0.0683
-   9  n_residues                           0.0663
-  10  di_UU                                0.0595
-  11  utr3_length                          0.0541
-  12  fU                                   0.0499
-  13  max_disorder_window                  0.0468
-  14  mean_disorder                        0.0423
-  15  utr5_length                          0.0355
-  16  cds_fraction                         0.0353
-  17  fG                                   0.0351
-  18  di_CA                                0.0318
-  19  di_GU                                0.0282
-  20  utr5_fraction                        0.0279
-  21  n_stemloops_per_kb                   0.0279
-  22  di_GC                                0.0251
-  23  rmsf_cterm50                         0.0248
-  24  di_GG                                0.0241
-  25  di_UC                                0.0220
-  26  di_AA                                0.0187
-  27  frac_paired                          0.0185
-  28  rrach_per_kb                         0.0182
-  29  longest_idr_region                   0.0174
-  30  mfe_per_nt                           0.0147
+   1  di_CG                                0.1987
+   2  utr3_au_content                      0.1877
+   3  mrna_length                          0.1827
+   4  packing_density                      0.1668
+   5  di_UA                                0.1619
+   6  rrach_count                          0.1381
+   7  di_UG                                0.1313
+   8  fU                                   0.1210
+   9  cds_length                           0.1023
+  10  mfe                                  0.0966
+  11  n_residues                           0.0928
+  12  utr3_length                          0.0924
+  13  di_GU                                0.0813
+  14  rmsf_std                             0.0728
+  15  rmsf_cterm50                         0.0712
+  16  rmsf_nterm50                         0.0664
+  17  di_CA                                0.0658
+  18  n_stemloops_per_kb                   0.0597
+  19  di_GC                                0.0561
+  20  fG                                   0.0492
+  21  di_UU                                0.0492
+  22  di_AG                                0.0476
+  23  di_CU                                0.0475
+  24  utr5_fraction                        0.0458
+  25  max_disorder_window                  0.0439
+  26  mean_disorder                        0.0437
+  27  rmsf_max                             0.0428
+  28  utr5_length                          0.0427
+  29  fC                                   0.0409
+  30  di_GA                                0.0396
