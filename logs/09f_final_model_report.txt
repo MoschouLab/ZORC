@@ -1,0 +1,68 @@
+ZORC Phase 9f — Final Model Report
+Timestamp: 2026-04-15 13:39:16
+
+Features: 61 (dropped: ['packing_x_idr', 'rrach_per_cds_kb'])
+Best class weight: balanced (1.43×)
+Calibration: Platt sigmoid, cv=5
+
+Brier score uncal/cal: 0.1801 / 0.1776
+
+TEST uncalibrated:
+  split: TEST uncal
+  threshold: 0.5
+  auroc: 0.7839880284324728
+  auprc: 0.8321575375565677
+  f1_macro: 0.691747384734599
+  f1_pos: 0.7655172413793103
+  f1_neg: 0.6179775280898876
+  tn: 55
+  fp: 44
+  fn: 24
+  tp: 111
+
+TEST calibrated:
+  split: TEST cal
+  threshold: 0.5
+  auroc: 0.7861578750467639
+  auprc: 0.8333374440297894
+  f1_macro: 0.7111111111111111
+  f1_pos: 0.7777777777777778
+  f1_neg: 0.6444444444444445
+  tn: 58
+  fp: 41
+  fn: 23
+  tp: 112
+
+HC: uncal=24/25  cal=23/25
+
+Top 30 SHAP:
+   1  cds_length                           0.0209
+   2  mrna_length                          0.0197
+   3  rrach_count                          0.0194
+   4  di_CG                                0.0186
+   5  mfe                                  0.0164
+   6  di_UA                                0.0162
+   7  utr3_au_content                      0.0145
+   8  di_UG                                0.0140
+   9  n_residues                           0.0119
+  10  cds_fraction                         0.0103
+  11  utr5_length                          0.0097
+  12  utr3_au_x_length                     0.0094
+  13  utr5_fraction                        0.0093
+  14  utr3_length                          0.0092
+  15  rmsf_std                             0.0089
+  16  rmsf_nterm_cterm_ratio               0.0088
+  17  rmsf_max                             0.0080
+  18  rmsf_nterm50                         0.0079
+  19  fU                                   0.0075
+  20  fG                                   0.0070
+  21  n_stemloops                          0.0069
+  22  di_CA                                0.0068
+  23  au_content                           0.0062
+  24  packing_density                      0.0061
+  25  di_CU                                0.0059
+  26  gc_content                           0.0058
+  27  di_GG                                0.0057
+  28  aaach_count                          0.0056
+  29  mean_disorder                        0.0056
+  30  di_UU                                0.0056
