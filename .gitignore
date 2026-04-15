@@ -26,3 +26,19 @@ data/processed/bioemu/*/topology.pdb
 data/processed/bioemu/*_dp.ps
 
 # Keep: CSVs, manifests, logs, input FASTAs
+
+# RNAfold dot-plot postscript files
+*.ps
+*.eps
+
+# BioEmu conformational ensembles (large binaries)
+data/processed/bioemu/AT*/
+
+# AF2 structure cache
+data/processed/af2_cache/
+
+# Backup files
+data/processed/*.pre_*
+
+# nohup logs
+logs/*_nohup.log
