@@ -379,6 +379,10 @@ def main():
     df_idr   = pd.read_csv(idr_path)
     with open(ckpt_path) as f:
         checkpoint = json.load(f)
+    ckpt_tier1_path = proj / cfg["outputs"].get("bioemu_checkpoint_tier1", "data/processed/bioemu/checkpoint_tier1.json")
+    if ckpt_tier1_path.exists():
+        with open(ckpt_tier1_path) as f:
+            checkpoint.update(json.load(f))
 
     # Merge tier + IDR info
     df = df_tiers.merge(
@@ -438,9 +442,12 @@ def main():
             topo = bioemu_dir / pkey / 'topology.pdb'
             xtc  = bioemu_dir / pkey / 'samples.xtc'
             if topo.exists() and xtc.exists():
-                n_req = (cfg['bioemu_tiers']['tier2_n_conformations']
-                         if tier == 2 else
-                         cfg['bioemu_tiers']['tier3_n_conformations'])
+                if tier == 2:
+                    n_req = cfg['bioemu_tiers']['tier2_n_conformations']
+                elif tier == 1:
+                    n_req = cfg['bioemu_tiers'].get('tier1_n_conformations', 100)
+                else:
+                    n_req = cfg['bioemu_tiers']['tier3_n_conformations']
                 feats = extract_bioemu_features(str(topo), str(xtc), n_req)
                 if feats.get('error') is None:
                     n_bioemu_ok += 1

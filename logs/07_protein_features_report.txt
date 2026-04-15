@@ -1,23 +1,23 @@
 ================================================================================
 ZORC — Protein Feature Extraction Report
 Script: 07_protein_features.py
-Generated: 2026-04-03 13:40:06
+Generated: 2026-04-15 10:26:01
 ================================================================================
 
 RESULTS
   Total proteins       : 1,457
-  BioEmu features      : 756
+  BioEmu features      : 1,452
   AF2-only features    : 0
-  Failed/missing       : 701
-  Runtime              : 8.8 min
+  Failed/missing       : 5
+  Runtime              : 1.0 min
 
 FEATURE SOURCE BREAKDOWN
-  bioemu                        : 756
-  af2_not_found                 : 700
+  bioemu                        : 1,452
+  af2_not_found                 : 4
 
 RMSF DISTRIBUTION (BioEmu proteins)
-  Positives: median=18.04 Å  mean=21.32 Å  min=0.00  max=105.19
-  Negatives: median=14.46 Å  mean=17.00 Å  min=0.00  max=94.46
+  Positives: median=11.32 Å  mean=14.67 Å  min=0.00  max=105.19
+  Negatives: median=10.68 Å  mean=13.07 Å  min=0.00  max=94.46
 
 ================================================================================
 END OF REPORT
