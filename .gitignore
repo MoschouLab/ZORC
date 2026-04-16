@@ -42,3 +42,4 @@ data/processed/*.pre_*
 
 # nohup logs
 logs/*_nohup.log
+.snakemake/

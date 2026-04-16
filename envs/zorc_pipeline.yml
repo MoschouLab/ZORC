@@ -19,7 +19,8 @@ dependencies:
   - pyyaml>=6.0
   - tqdm>=4.66
   - jupyterlab>=4.0
-  - snakemake>=7.32                # P10 workflow manager
+  - graphviz>=12.0               # P10 DAG visualization (snakemake --dag | dot)
   - pip
   - pip:
-      - pydeseq2            # optional, for DE context
+      - snakemake>=9.0             # P10 workflow manager (pip: conda bioconda build conflicts with python=3.11)
+      - pydeseq2                   # optional, for DE context
