@@ -1,0 +1,26 @@
+============================================================
+ZORC P11a — Database Build Report
+============================================================
+Database   : data/zorc_database.db
+Size       : 752.0 KB
+
+-- genes table --
+  Total    : 1501
+  Positive : 880
+  Negative : 621
+  BioEmu tiers: {np.int64(1): 698, np.int64(2): 328, np.int64(3): 431}
+  Splits       : {'train': 1055, 'test': 234, 'val': 212}
+
+-- features table --
+  Rows     : 1501
+  Columns  : 44
+
+-- predictions table --
+  Rows     : 1501
+  SHAP covered : 496/1501 genes
+  Prob range : 0.049 – 0.938
+  Predicted pos: 916 / neg: 585
+
+Tables: genes, features, predictions
+FK constraints: features.gene_id → genes, predictions.gene_id → genes
+============================================================
