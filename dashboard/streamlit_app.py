@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 import duckdb
+import json
 import numpy as np
 import pandas as pd
 import pickle
@@ -26,8 +27,9 @@ BASE_MODEL    = ROOT / "results" / "09f_rf_base_model.pkl"
 FINAL_MODEL   = ROOT / "results" / "09f_rf_final_model.pkl"
 PREDS_PATH    = ROOT / "results" / "09f_predictions_final.csv"
 SHAP_IMP_PATH = ROOT / "results" / "09f_shap_final.csv"
-PROBES_PATH   = ROOT / "results" / "11a_xenium_probe_candidates.csv"
-HC_PATH       = ROOT / "data" / "processed" / "colleague_high_confidence_set.csv"
+PROBES_PATH     = ROOT / "results" / "11a_xenium_probe_candidates.csv"
+HC_PATH         = ROOT / "data" / "processed" / "colleague_high_confidence_set.csv"
+TAIR_UNIPROT    = ROOT / "data" / "processed" / "af2_cache" / "tair_uniprot_map.json"
 
 META_COLS = {
     "geneID", "gene_id", "transcript_id", "class", "condition", "qc_fail",
@@ -103,6 +105,12 @@ def load_probes() -> pd.DataFrame:
 @st.cache_data(show_spinner=False)
 def load_hc_set() -> pd.DataFrame:
     return pd.read_csv(HC_PATH)
+
+
+@st.cache_data(show_spinner=False)
+def load_tair_uniprot_map() -> dict:
+    with open(TAIR_UNIPROT) as f:
+        return json.load(f)
 
 
 def db_query(sql: str) -> pd.DataFrame:
@@ -384,9 +392,14 @@ def page_gene_search():
 
     # ── External links ────────────────────────────────────────────────────────
     st.markdown("### External resources")
-    tair_url     = f"https://www.arabidopsis.org/servlets/TairObject?type=locus&name={gene_id}"
-    uniprot_url  = f"https://www.uniprot.org/uniprotkb?query={gene_id}&organism_id=3702"
-    af2_url      = f"https://alphafold.ebi.ac.uk/search/text/{gene_id}"
+    tair_url    = f"https://www.arabidopsis.org/servlets/TairObject?type=locus&name={gene_id}"
+    uniprot_url = f"https://www.uniprot.org/uniprotkb?query={gene_id}&organism_id=3702"
+    tair_map    = load_tair_uniprot_map()
+    uniprot_id  = tair_map.get(gene_id)
+    if uniprot_id:
+        af2_url = f"https://alphafold.ebi.ac.uk/entry/{uniprot_id}"
+    else:
+        af2_url = f"https://alphafold.ebi.ac.uk/search/text/{gene_id}"
     st.markdown(
         f"[TAIR — {gene_id}]({tair_url})  |  "
         f"[UniProt search]({uniprot_url})  |  "
