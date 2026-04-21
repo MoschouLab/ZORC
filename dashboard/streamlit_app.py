@@ -616,8 +616,9 @@ def page_model_card():
 
     st.subheader("Known limitations")
     st.markdown("""
-- **49.5% imputed BioEmu features** for Tier 1 proteins (IDR < 10%) — dilutes SHAP contributions
-  of conformational dynamics features.
+- **3.2% imputed BioEmu features** (down from 49.5% before P6b/P9c) — AF2 structure recovery
+  (P6b) and P9c patch recovered real structural values for Tier 1 proteins; only 2 OOM-excluded
+  proteins (AT2G28290, AT2G45540) retain median imputation for dynamic features.
 - **Length confound:** `mrna_length` and `cds_length` are top predictors; length-only baseline
   not yet computed.
 - **Label noise:** ~19% of negatives have P(pos) 0.35–0.65 (possible T-RIP / stress-granule
