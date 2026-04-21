@@ -135,46 +135,92 @@ def confidence_label(prob: float) -> str:
 
 # ── Page 1: Gene Search ───────────────────────────────────────────────────────
 
+_GENE_LOOKUP_SQL = """
+    SELECT g.gene_id, g.gene_name, g.condition, g.class,
+           g.bioemu_tier, g.split,
+           ROUND(p.prob_pos, 4) AS prob_pos, p.pred,
+           f.mrna_length, f.cds_length, f.utr3_length, f.utr5_length,
+           ROUND(f.utr3_au_content, 4)       AS utr3_au_content,
+           ROUND(f.rrach_count, 0)            AS rrach_count,
+           ROUND(f.rrach_per_kb, 2)           AS rrach_per_kb,
+           ROUND(f.idr_percent, 2)            AS idr_percent,
+           ROUND(f.rmsf_mean, 2)              AS rmsf_mean,
+           ROUND(f.rmsf_nterm50, 2)           AS rmsf_nterm50,
+           ROUND(f.rmsf_cterm50, 2)           AS rmsf_cterm50,
+           ROUND(f.rmsf_nterm_cterm_ratio, 3) AS rmsf_ratio,
+           ROUND(f.n_residues, 0)             AS n_residues,
+           ROUND(f.mfe_per_nt, 4)             AS mfe_per_nt
+    FROM z.genes g
+    JOIN z.predictions p USING (gene_id)
+    JOIN z.features f USING (gene_id)
+    WHERE {where_clause}
+"""
+
+
 def page_gene_search():
     st.title("🔍 Gene Search")
-    st.markdown("Enter an *Arabidopsis thaliana* AGI code to retrieve the ZORC P-body enrichment prediction.")
+    st.markdown(
+        "Enter an *Arabidopsis thaliana* AGI code (e.g. `AT5G47010`) "
+        "or a gene name (e.g. `LBA1`, `SUA`)."
+    )
 
     fm, feature_cols, imputer, explainer, X_imp, preds = get_shared_data()
 
     gene_input = st.text_input(
-        "AGI code (e.g. AT5G47010)",
+        "AGI code or gene name",
         value="AT5G47010",
-        max_chars=12,
-    ).strip().upper()
+        max_chars=40,
+    ).strip()
 
     if not gene_input:
         return
 
-    # ── Look up gene in SQLite ────────────────────────────────────────────────
-    row_db = db_query(f"""
-        SELECT g.gene_id, g.gene_name, g.condition, g.class,
-               g.bioemu_tier, g.split,
-               ROUND(p.prob_pos, 4) AS prob_pos, p.pred,
-               f.mrna_length, f.cds_length, f.utr3_length, f.utr5_length,
-               ROUND(f.utr3_au_content, 4)       AS utr3_au_content,
-               ROUND(f.rrach_count, 0)            AS rrach_count,
-               ROUND(f.rrach_per_kb, 2)           AS rrach_per_kb,
-               ROUND(f.idr_percent, 2)            AS idr_percent,
-               ROUND(f.rmsf_mean, 2)              AS rmsf_mean,
-               ROUND(f.rmsf_nterm50, 2)           AS rmsf_nterm50,
-               ROUND(f.rmsf_cterm50, 2)           AS rmsf_cterm50,
-               ROUND(f.rmsf_nterm_cterm_ratio, 3) AS rmsf_ratio,
-               ROUND(f.n_residues, 0)             AS n_residues,
-               ROUND(f.mfe_per_nt, 4)             AS mfe_per_nt
-        FROM z.genes g
-        JOIN z.predictions p USING (gene_id)
-        JOIN z.features f USING (gene_id)
-        WHERE g.gene_id = '{gene_input}'
-    """)
+    # ── Resolve input: AGI code or gene name ─────────────────────────────────
+    is_agi = gene_input.upper().startswith("AT") and gene_input[2:3].isdigit()
+
+    if is_agi:
+        gene_id = gene_input.upper()
+        row_db = db_query(
+            _GENE_LOOKUP_SQL.format(where_clause=f"g.gene_id = '{gene_id}'")
+        )
+    else:
+        # Gene name search — case-insensitive LIKE
+        candidates = db_query(f"""
+            SELECT gene_id, gene_name, condition,
+                   ROUND(p.prob_pos, 4) AS prob_pos
+            FROM z.genes g
+            JOIN z.predictions p USING (gene_id)
+            WHERE lower(g.gene_name) LIKE lower('%{gene_input}%')
+              AND g.gene_name IS NOT NULL
+            ORDER BY p.prob_pos DESC
+        """)
+        if candidates.empty:
+            st.warning(
+                f"No gene found matching **'{gene_input}'**. "
+                "Try an AGI code (AT*G*) or check the spelling."
+            )
+            return
+        if len(candidates) > 1:
+            opts = [
+                f"{r.gene_id} — {r.gene_name} ({r.condition}, P={r.prob_pos:.3f})"
+                for r in candidates.itertuples()
+            ]
+            sel = st.selectbox(
+                f"{len(candidates)} genes match '{gene_input}' — select one:",
+                opts,
+            )
+            gene_id = sel.split(" — ")[0]
+        else:
+            gene_id = candidates.iloc[0]["gene_id"]
+        row_db = db_query(
+            _GENE_LOOKUP_SQL.format(where_clause=f"g.gene_id = '{gene_id}'")
+        )
 
     if row_db.empty:
-        st.warning(f"Gene **{gene_input}** not found in the ZORC database. "
-                   "Check the AGI code or verify the gene is in the coregulon.")
+        st.warning(
+            f"Gene **{gene_input}** not found in the ZORC database. "
+            "Check the AGI code or verify the gene is in the coregulon."
+        )
         return
 
     row = row_db.iloc[0]
@@ -185,7 +231,7 @@ def page_gene_search():
 
     # ── Header row ────────────────────────────────────────────────────────────
     gname = row["gene_name"] if pd.notna(row["gene_name"]) else ""
-    st.subheader(f"{gene_input}  {'  |  ' + gname if gname else ''}")
+    st.subheader(f"{gene_id}  {'  |  ' + gname if gname else ''}")
 
     col_meta1, col_meta2, col_meta3, col_meta4 = st.columns(4)
     col_meta1.metric("Prediction", label)
@@ -218,26 +264,27 @@ def page_gene_search():
     fig_gauge.update_layout(height=260, margin=dict(t=40, b=10, l=40, r=40))
 
     # ── SHAP waterfall (per gene) ─────────────────────────────────────────────
-    gene_row_fm = fm[fm["geneID"] == gene_input]
+    # Use gene_id (resolved above) to find the row in the feature matrix.
+    # Slice .iloc[[0]] to guarantee exactly one row regardless of duplicate
+    # geneID entries, which would produce shape (N, 61, 2) and break indexing.
+    gene_row_fm = fm[fm["geneID"] == gene_id]
     shap_fig = None
     if not gene_row_fm.empty:
-        idx = gene_row_fm.index[0]
-        X_single_raw = gene_row_fm[feature_cols].values.astype(np.float32)
-        X_single_imp = imputer.transform(X_single_raw)
+        X_single_raw = gene_row_fm[feature_cols].iloc[[0]].values.astype(np.float32)
+        X_single_imp = imputer.transform(X_single_raw)  # (1, 61), NaN → median
         sv_raw = np.array(explainer.shap_values(X_single_imp))
-        # sv_raw shape: (n_samples, n_features, n_classes) or (n_classes, n_samples, n_features)
-        if sv_raw.ndim == 3 and sv_raw.shape[0] == 1:
-            sv = sv_raw[0, :, 1]   # (n_features, n_classes)[class=1]
-        elif sv_raw.ndim == 3:
-            sv = sv_raw[:, 0, 1]   # (n_classes, n_samples, n_features) → class=1, sample=0
+        # sv_raw guaranteed shape (1, n_features, n_classes) after the iloc[[0]] fix
+        if sv_raw.ndim == 3:
+            sv = sv_raw[0, :, 1]   # class=1 SHAP values, shape (n_features,)
         else:
             sv = sv_raw.ravel()
-        shap_df = (
-            pd.DataFrame({"feature": feature_cols, "shap": sv})
-            .reindex(pd.Series(sv).abs().sort_values(ascending=False).index)
-            .head(10)
-            .sort_values("shap")
-        )
+        # Sort by absolute SHAP, keep top 10, then sort ascending for the bar chart
+        abs_order = np.argsort(np.abs(sv))[::-1][:10]
+        top_idx   = abs_order[np.argsort(sv[abs_order])]
+        shap_df   = pd.DataFrame({
+            "feature": [feature_cols[i] for i in top_idx],
+            "shap":    sv[top_idx],
+        })
         colors = [PALETTE["positive"] if v > 0 else PALETTE["negative"] for v in shap_df["shap"]]
         fig_shap = go.Figure(go.Bar(
             x=shap_df["shap"],
@@ -337,11 +384,11 @@ def page_gene_search():
 
     # ── External links ────────────────────────────────────────────────────────
     st.markdown("### External resources")
-    tair_url     = f"https://www.arabidopsis.org/servlets/TairObject?type=locus&name={gene_input}"
-    uniprot_url  = f"https://www.uniprot.org/uniprotkb?query={gene_input}&organism_id=3702"
-    af2_url      = f"https://alphafold.ebi.ac.uk/search/text/{gene_input}"
+    tair_url     = f"https://www.arabidopsis.org/servlets/TairObject?type=locus&name={gene_id}"
+    uniprot_url  = f"https://www.uniprot.org/uniprotkb?query={gene_id}&organism_id=3702"
+    af2_url      = f"https://alphafold.ebi.ac.uk/search/text/{gene_id}"
     st.markdown(
-        f"[TAIR — {gene_input}]({tair_url})  |  "
+        f"[TAIR — {gene_id}]({tair_url})  |  "
         f"[UniProt search]({uniprot_url})  |  "
         f"[AlphaFold2 entry]({af2_url})"
     )
