@@ -1,0 +1,34 @@
+======================================================================
+ZORC P9g — Length Baseline Report
+Generated: 2026-04-21 13:08:07
+======================================================================
+
+Features used: mrna_length, cds_length (top-2 SHAP from P9d)
+Train: 1064  Val: 212  Test: 234
+
+── OOB score ──────────────────────────────────────────────────────
+  0.6626
+
+── VAL (212 genes) ────────────────────────────────────
+  AUROC : 0.6864
+  AUPRC : 0.7221
+  F1-mac: 0.6283  (pos=0.6984  neg=0.5581)
+  Confusion matrix (rows=True, cols=Pred):
+    [[48 39]
+ [37 88]]
+
+── TEST (234 genes) ────────────────────────────────────
+  AUROC : 0.6434
+  AUPRC : 0.7126
+  F1-mac: 0.5957  (pos=0.6942  neg=0.4972)
+  Confusion matrix (rows=True, cols=Pred):
+    [[ 44  55]
+ [ 34 101]]
+
+── Comparison vs full model P9d ─────────────────────────────────
+  P9g (2 features)  val AUROC: 0.6864  test AUROC: 0.6434
+  P9d (63 features) val AUROC: 0.7969  test AUROC: 0.7963
+  Delta test AUROC: 0.1529  (+23.76% relative gain)
+
+MLflow logged: no (install mlflow to enable)
+======================================================================
