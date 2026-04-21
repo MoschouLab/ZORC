@@ -98,7 +98,9 @@ def main():
     args = parse_args()
     cfg  = load_config(args.config)
 
-    fm_path = ROOT / cfg["paths"]["feature_matrix"]
+    base_dir = Path(cfg.get("project_dir", "~/Documents/ZORC")).expanduser()
+    fm_path  = base_dir / cfg.get("outputs", {}).get(
+                   "feature_matrix", "data/processed/08_zorc_feature_matrix.csv")
     df = pd.read_csv(fm_path)
 
     # Validate required columns
@@ -140,7 +142,7 @@ def main():
     res_test = evaluate(model, X_test, y_test, "test")
 
     # ── Save model ────────────────────────────────────────────────────────────
-    results_dir = ROOT / "results"
+    results_dir = base_dir / "results"
     results_dir.mkdir(exist_ok=True)
     model_path = results_dir / "09g_length_baseline_model.pkl"
     with open(model_path, "wb") as f:
@@ -186,7 +188,7 @@ def main():
             mlflow.log_artifact(str(preds_path))
 
     # ── Report ────────────────────────────────────────────────────────────────
-    logs_dir = ROOT / "logs"
+    logs_dir = base_dir / "logs"
     logs_dir.mkdir(exist_ok=True)
     report_path = logs_dir / "09g_length_baseline_report.txt"
 
