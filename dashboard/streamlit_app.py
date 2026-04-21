@@ -23,10 +23,10 @@ from sklearn.impute import SimpleImputer
 ROOT = Path(__file__).parent.parent
 DB_PATH       = ROOT / "data" / "zorc_database.db"
 FM_PATH       = ROOT / "data" / "processed" / "08_zorc_feature_matrix.csv"
-BASE_MODEL    = ROOT / "results" / "09f_rf_base_model.pkl"
+BASE_MODEL    = ROOT / "results" / "09d_rf_eng_model.pkl"
 FINAL_MODEL   = ROOT / "results" / "09f_rf_final_model.pkl"
 PREDS_PATH    = ROOT / "results" / "09f_predictions_final.csv"
-SHAP_IMP_PATH = ROOT / "results" / "09f_shap_final.csv"
+SHAP_IMP_PATH = ROOT / "results" / "09d_shap_rf_eng.csv"
 PROBES_PATH     = ROOT / "results" / "11a_xenium_probe_candidates.csv"
 HC_PATH         = ROOT / "data" / "processed" / "colleague_high_confidence_set.csv"
 TAIR_UNIPROT    = ROOT / "data" / "processed" / "af2_cache" / "tair_uniprot_map.json"
@@ -512,7 +512,7 @@ def page_xenium():
 def page_model_card():
     st.title("📋 Model Card")
     st.markdown(
-        "**ZORC P9f — RandomForest + Platt calibration** "
+        "**ZORC P9d — RandomForestClassifier (best AUROC + F1)** "
         "(*Arabidopsis thaliana* P-body mRNA enrichment prediction)"
     )
 
@@ -582,7 +582,7 @@ def page_model_card():
         st.plotly_chart(fig_cm, use_container_width=False)
 
     # ── Feature importance (SHAP) ─────────────────────────────────────────────
-    st.subheader("Feature importance — mean |SHAP| (P9f final model)")
+    st.subheader("Feature importance — mean |SHAP| (P9d best model)")
     shap_imp = load_shap_importance().head(20)
     fig_shap = go.Figure(go.Bar(
         x=shap_imp["mean_abs_shap"][::-1].tolist(),
@@ -610,8 +610,8 @@ def page_model_card():
 | Split | 70/15/15 train/val/test, CD-HIT 40% anti-leakage |
 | RNA source | Liu et al. 2024 *Plant Cell* (T-RIP) |
 | Protein source | Liu et al. 2023 *EMBO J* (APEAL proteomics) |
-| Model | RandomForestClassifier 500 trees + Platt calibration |
-| Phase | P9f (final) — April 2026 |
+| Model | RandomForestClassifier 500 trees (feature engineering, best AUROC+F1) |
+| Phase | P9d — April 2026 |
     """)
 
     st.subheader("Known limitations")
