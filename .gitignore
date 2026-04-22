@@ -46,3 +46,6 @@ data/processed/*.pre_*
 # nohup logs
 logs/*_nohup.log
 .snakemake/
+
+# MLflow run artifacts (regenerable by running 10b_mlflow_retroactive.py)
+mlruns/

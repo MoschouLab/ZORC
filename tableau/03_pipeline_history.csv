@@ -1,0 +1,13 @@
+phase,run_label,split,auroc,auprc,f1_macro,n_features,notes,phase_order
+P9,RF Baseline,val,0.799,0.8312,0.7247,56,"Global median imputation, pre-AF2",1
+P9,RF Baseline,test,0.7974,0.8469,0.7382,56,"Global median imputation, pre-AF2",1
+P9g,Length-only Baseline,val,0.6864,0.7221,0.6283,2,mrna_length + cds_length only,0
+P9g,Length-only Baseline,test,0.6434,0.69,0.587,2,mrna_length + cds_length only,0
+P9b,XGBoost (post-AF2),val,0.8001,0.8229,0.7271,60,"NaN-native, AF2 static features",2
+P9b,XGBoost (post-AF2),test,0.7879,0.8317,0.6976,60,"NaN-native, AF2 static features",2
+P9d,RF + Feature Eng.,val,0.7969,0.8269,0.7094,63,4 interaction features added,3
+P9d,RF + Feature Eng.,test,0.7963,0.8431,0.7229,63,4 interaction features added,3
+P9d,XGB + Feature Eng.,val,0.8036,0.8302,0.7294,63,4 interaction features added,3
+P9d,XGB + Feature Eng.,test,0.7811,0.8181,0.7027,63,4 interaction features added,3
+P9f,RF Final (Platt cal.),val,0.7979,,,61,"Platt calibration cv=5, Brier=0.1776",4
+P9f,RF Final (Platt cal.),test,0.7862,0.8333,0.7111,61,"Platt calibration cv=5, Brier=0.1776",4
