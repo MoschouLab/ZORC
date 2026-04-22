@@ -1,0 +1,5 @@
+outs:
+- md5: 6e4a09f1c0b91f1ec38633dd122bf486
+  size: 9922697
+  hash: md5
+  path: 09_zorc_rf_model.pkl

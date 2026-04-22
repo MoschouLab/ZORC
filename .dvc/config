@@ -1,0 +1,5 @@
+[core]
+    remote = zorc_local
+    autostage = true
+['remote "zorc_local"']
+    url = /home/moschou/dvc_remote/zorc
