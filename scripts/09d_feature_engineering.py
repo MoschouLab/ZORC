@@ -35,6 +35,7 @@ Rationale per feature:
 
 Outputs:
     data/processed/08_zorc_feature_matrix_eng.csv   enriched feature matrix
+    results/09d_zorc_predictions.csv                RF predictions (all 1510 genes)
     results/09d_shap_rf_eng.csv                     RF SHAP importance
     results/09d_shap_xgb_eng.csv                    XGBoost SHAP importance
     results/09d_rf_eng_model.pkl                    RF model
@@ -439,6 +440,19 @@ def main():
     pred_hc_xgb = (prob_hc_xgb >= 0.5).astype(int)
     ok_xgb      = (pred_hc_xgb == y_hc).sum()
     print(f"  XGB : {ok_xgb}/{len(y_hc)} ({ok_xgb/len(y_hc)*100:.0f}%)")
+
+    # ── Full-dataset RF predictions ──────────────────────────────────────────
+    X_all_rf  = imputer.transform(X)
+    prob_all  = rf.predict_proba(X_all_rf)[:, 1]
+    meta_avail = [c for c in ["gene_id", "transcript_id", "class", "split",
+                               "condition", "bioemu_tier"] if c in df.columns]
+    pred_df   = df[meta_avail].copy()
+    pred_df["prob_pos"] = prob_all
+    pred_df["pred"]     = (prob_all >= 0.5).astype(int)
+    pred_df["correct"]  = (pred_df["pred"] == pred_df["class"]).astype(int)
+    pred_path = results_dir / "09d_zorc_predictions.csv"
+    pred_df.to_csv(pred_path, index=False)
+    print(f"\n  Predictions saved: {pred_path.name} ({len(pred_df):,} genes)")
 
     # ── Save outputs ──────────────────────────────────────────────────────────
     imp_rf.to_csv(results_dir / "09d_shap_rf_eng.csv", index=False)
