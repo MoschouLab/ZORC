@@ -1,0 +1,65 @@
+# Source control
+.git/
+.gitignore
+
+# Large data that is NOT needed in the container
+data/raw/
+data/processed/
+data/processed/bioemu/
+
+# Keep only the DB file that /lookup uses
+# (data/zorc_database.db is explicitly COPY-ed in the Dockerfile)
+
+# Python artefacts
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Conda / virtualenvs
+envs/
+.conda/
+
+# Experiment tracking (large artefacts, not needed at serve time)
+mlruns/
+.dvc/
+*.dvc
+
+# Model files not used by the container (keep 09d_rf_eng_model.pkl)
+results/09_zorc_rf_model.pkl
+results/09b_zorc_xgb_model.json
+results/09d_xgb_eng_model.json
+results/09f_rf_base_model.pkl
+results/09f_rf_final_model.pkl
+results/09g_length_baseline_model.pkl
+results/*.csv
+
+# Notebooks and dashboards
+notebooks/
+dashboard/
+tableau/
+
+# Agent layer
+agent/
+
+# Monitoring
+monitoring/
+
+# Scripts (pipeline, not API)
+scripts/
+logs/
+
+# Tests
+tests/
+
+# Docs
+docs/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
