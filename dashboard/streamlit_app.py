@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 import pickle
 import plotly.graph_objects as go
+import requests
 import shap
 import streamlit as st
 from sklearn.impute import SimpleImputer
@@ -628,6 +629,164 @@ def page_model_card():
     """)
 
 
+# ── Page 4: Predict Your Gene ─────────────────────────────────────────────────
+
+_API_PREDICT_URL = "http://localhost:8000/predict"
+
+
+def page_predict_gene():
+    st.title("🧬 Predict Your Gene")
+    st.markdown(
+        "Compute a P-body enrichment prediction for **any mRNA sequence** — "
+        "not necessarily in the ZORC dataset.  \n"
+        "RNA features are computed on-the-fly by the API.  \n"
+        "⚠️ Requires the ZORC API running locally: "
+        "`uvicorn api.main:app --reload --port 8000`"
+    )
+
+    col_form, col_result = st.columns([1, 1], gap="large")
+
+    with col_form:
+        gene_id_input = st.text_input(
+            "Gene ID (optional — for labelling only)",
+            value="",
+            max_chars=40,
+            placeholder="e.g. AT1G01470",
+        )
+        mrna_seq = st.text_area(
+            "mRNA sequence **(required, min 50 nt)**",
+            height=220,
+            placeholder="Paste full spliced mRNA (DNA or RNA notation)...",
+        ).strip()
+        protein_seq_input = st.text_input(
+            "Protein sequence (optional — improves CDS length estimate)",
+            value="",
+            placeholder="Paste translated amino-acid sequence or leave empty...",
+        ).strip()
+        use_rnafold = st.checkbox(
+            "Use RNAfold for MFE / structure features",
+            value=True,
+            help="Disable for faster prediction; MFE features will be median-imputed.",
+        )
+        execute = st.button("▶ Execute Prediction", type="primary", use_container_width=True)
+
+    with col_result:
+        if not execute:
+            st.info("Fill in the mRNA sequence and click **Execute Prediction**.")
+            return
+
+        if len(mrna_seq) < 50:
+            st.error("mRNA sequence must be at least 50 nucleotides.")
+            return
+
+        payload = {
+            "gene_id":     gene_id_input or "query",
+            "mrna_seq":    mrna_seq,
+            "protein_seq": protein_seq_input or None,
+            "use_rnafold": use_rnafold,
+        }
+
+        with st.spinner("Calling ZORC API…"):
+            try:
+                resp = requests.post(_API_PREDICT_URL, json=payload, timeout=120)
+            except requests.exceptions.ConnectionError:
+                st.error(
+                    "Cannot reach the ZORC API at `localhost:8000`.  \n"
+                    "Start it with: `uvicorn api.main:app --reload --port 8000`"
+                )
+                return
+
+        if resp.status_code != 200:
+            st.error(f"API error {resp.status_code}: {resp.text}")
+            return
+
+        data = resp.json()
+        prob  = float(data["prob_p_body"])
+        pred  = data["prediction"]
+        conf  = data["confidence"]
+        color = PALETTE["positive"] if pred == "enriched" else PALETTE["negative"]
+
+        # ── Metrics row ───────────────────────────────────────────────────────
+        st.subheader(data["gene_id"] or "Query gene")
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Prediction", "P-body enriched" if pred == "enriched" else "Not enriched")
+        c2.metric("Confidence", conf.capitalize())
+        c3.metric("P(P-body)", f"{prob:.3f}")
+
+        # ── Gauge ─────────────────────────────────────────────────────────────
+        fig_gauge = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=round(prob, 3),
+            number={"font": {"size": 32}},
+            gauge={
+                "axis": {"range": [0, 1], "tickwidth": 1},
+                "bar": {"color": color},
+                "steps": [
+                    {"range": [0, 0.25], "color": "#FADADD"},
+                    {"range": [0.25, 0.55], "color": "#FFF3CD"},
+                    {"range": [0.55, 0.75], "color": "#D4EDDA"},
+                    {"range": [0.75, 1.0], "color": "#C3E6CB"},
+                ],
+                "threshold": {
+                    "line": {"color": "black", "width": 3},
+                    "thickness": 0.75,
+                    "value": 0.5,
+                },
+            },
+            title={"text": "P(P-body enriched)", "font": {"size": 16}},
+        ))
+        fig_gauge.update_layout(height=260, margin=dict(t=40, b=10, l=40, r=40))
+        st.plotly_chart(fig_gauge, use_container_width=True)
+
+        # ── Top SHAP features bar chart ───────────────────────────────────────
+        top_feats = data.get("top_features", {})
+        if top_feats:
+            feat_names  = list(top_feats.keys())
+            shap_values = [top_feats[f]["shap"] for f in feat_names]
+            feat_values = [top_feats[f]["value"] for f in feat_names]
+
+            # Sort ascending for horizontal bar readability
+            order = sorted(range(len(shap_values)), key=lambda i: shap_values[i])
+            feat_names  = [feat_names[i]  for i in order]
+            shap_values = [shap_values[i] for i in order]
+            feat_values = [feat_values[i] for i in order]
+
+            bar_colors = [
+                PALETTE["positive"] if v > 0 else PALETTE["negative"]
+                for v in shap_values
+            ]
+            hover_text = [
+                f"{feat_names[i]}<br>value: {feat_values[i]:.4g}<br>SHAP: {shap_values[i]:+.4f}"
+                for i in range(len(feat_names))
+            ]
+            fig_shap = go.Figure(go.Bar(
+                x=shap_values,
+                y=feat_names,
+                orientation="h",
+                marker_color=bar_colors,
+                text=[f"{v:+.4f}" for v in shap_values],
+                textposition="outside",
+                hovertext=hover_text,
+                hoverinfo="text",
+            ))
+            fig_shap.add_vline(x=0, line_color="black", line_width=1)
+            fig_shap.update_layout(
+                title="Top 5 SHAP contributions",
+                xaxis_title="SHAP value → P-body enriched",
+                yaxis_title="",
+                height=300,
+                margin=dict(t=40, b=30, l=10, r=80),
+            )
+            st.plotly_chart(fig_shap, use_container_width=True)
+
+        # ── Imputed features notice ───────────────────────────────────────────
+        imputed = data.get("imputed_features", [])
+        if imputed:
+            st.caption(f"ℹ️ Median-imputed features: {', '.join(imputed)}")
+
+        st.caption(data.get("disclaimer", ""))
+
+
 # ── Sidebar & routing ─────────────────────────────────────────────────────────
 
 def main():
@@ -638,7 +797,7 @@ def main():
         st.divider()
         page = st.radio(
             "Navigate",
-            ["Gene Search", "Xenium Probe Candidates", "Model Card"],
+            ["Gene Search", "Predict Your Gene", "Xenium Probe Candidates", "Model Card"],
             index=0,
         )
         st.divider()
@@ -646,6 +805,8 @@ def main():
 
     if page == "Gene Search":
         page_gene_search()
+    elif page == "Predict Your Gene":
+        page_predict_gene()
     elif page == "Xenium Probe Candidates":
         page_xenium()
     else:
