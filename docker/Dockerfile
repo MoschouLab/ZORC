@@ -1,13 +1,13 @@
-FROM continuumio/miniconda3
+FROM python:3.11-slim-bookworm
 
 WORKDIR /app
 
-# ViennaRNA (RNAfold via subprocess in feature_compute.py)
-# Only available via conda-forge; not in Debian repos
-RUN conda install -c conda-forge viennarna curl -y \
-    && conda clean -afy
+# curl required by the HEALTHCHECK command
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# Python dependencies via pip (faster than conda for pure-Python packages)
+# Python dependencies (includes ViennaRNA Python package which bundles RNAfold)
 COPY api/requirements_api.txt .
 RUN pip install --no-cache-dir -r requirements_api.txt
 
