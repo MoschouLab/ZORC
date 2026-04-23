@@ -4,6 +4,7 @@ FROM debian:bookworm-slim AS viennarna-builder
 ARG VIENNARNA_VERSION=2.6.4
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates \
         wget \
         build-essential \
         pkg-config \
