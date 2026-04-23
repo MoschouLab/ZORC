@@ -22,6 +22,7 @@ Swagger UI:  http://localhost:8000/docs
 import json
 import os
 import pickle
+import sqlite3
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
@@ -37,8 +38,9 @@ from api.feature_compute import compute_features, PROTEIN_FEATURE_NAMES
 
 _HERE       = Path(__file__).parent
 _REPO_ROOT  = _HERE.parent
-_MODEL_PATH = _REPO_ROOT / "results" / "09d_rf_eng_model.pkl"
+_MODEL_PATH   = _REPO_ROOT / "results" / "09d_rf_eng_model.pkl"
 _MEDIANS_PATH = _HERE / "imputation_medians.json"
+_DB_PATH      = _REPO_ROOT / "data" / "zorc_database.db"
 
 # ── Global model state ────────────────────────────────────────────────────────
 
@@ -144,6 +146,15 @@ class ModelInfoResponse(BaseModel):
     hc_accuracy:    float
     training_date:  str
     note:           str
+
+
+class LookupResponse(BaseModel):
+    gene_id:           str
+    prob_pos:          float = Field(..., description="P(P-body enriched) ∈ [0, 1]")
+    prediction:        str   = Field(..., description="'enriched' or 'not_enriched'")
+    confidence:        str   = Field(..., description="'high' (≥0.75) / 'medium' (0.55–0.75) / 'low' (<0.55)")
+    top_shap_features: dict[str, float] = Field(..., description="Top SHAP contributions stored in DB")
+    source:            str = "ZORC dataset (P9d model)"
 
 
 # ── Core prediction logic ─────────────────────────────────────────────────────
@@ -280,6 +291,75 @@ def model_info():
             "not available. "
             "For Platt-calibrated probabilities use results/09f_rf_final_model.pkl."
         ),
+    )
+
+
+@app.get("/lookup/{gene_id}", response_model=LookupResponse, tags=["Lookup"])
+def lookup_gene(gene_id: str):
+    """
+    Return pre-computed prediction for a gene already in the ZORC dataset.
+
+    Queries the SQLite database built by `scripts/10a_build_database.py`.
+    Returns prob_pos, prediction, confidence, and the top SHAP contributions
+    stored at database build time.  Returns 404 when the gene is not present.
+    """
+    if not _DB_PATH.exists():
+        raise HTTPException(
+            status_code=503,
+            detail="ZORC database not found. Run scripts/10a_build_database.py first.",
+        )
+
+    con = sqlite3.connect(_DB_PATH)
+    con.row_factory = sqlite3.Row
+    try:
+        row = con.execute(
+            """
+            SELECT p.gene_id, p.prob_pos, p.pred,
+                   p.shap_mrna_length, p.shap_cds_length,
+                   p.shap_di_CG, p.shap_utr3_au_content,
+                   p.shap_rrach_per_kb, p.shap_rmsf_nterm50
+            FROM predictions p
+            WHERE p.gene_id = ?
+            """,
+            (gene_id.upper(),),
+        ).fetchone()
+    finally:
+        con.close()
+
+    if row is None:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"Gene '{gene_id.upper()}' is not in the ZORC dataset. "
+                "Use POST /predict with an mRNA sequence to obtain a new prediction."
+            ),
+        )
+
+    prob = float(row["prob_pos"])
+    prediction = "enriched" if row["pred"] == 1 else "not_enriched"
+    if prob >= 0.75:
+        confidence = "high"
+    elif prob >= 0.55:
+        confidence = "medium"
+    else:
+        confidence = "low"
+
+    shap_map = {
+        "mrna_length":     row["shap_mrna_length"],
+        "cds_length":      row["shap_cds_length"],
+        "di_CG":           row["shap_di_CG"],
+        "utr3_au_content": row["shap_utr3_au_content"],
+        "rrach_per_kb":    row["shap_rrach_per_kb"],
+        "rmsf_nterm50":    row["shap_rmsf_nterm50"],
+    }
+    top_shap = {k: round(float(v), 6) for k, v in shap_map.items() if v is not None}
+
+    return LookupResponse(
+        gene_id=row["gene_id"],
+        prob_pos=round(prob, 6),
+        prediction=prediction,
+        confidence=confidence,
+        top_shap_features=top_shap,
     )
 
 
