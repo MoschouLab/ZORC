@@ -1,10 +1,10 @@
-FROM python:3.11-slim
+FROM python:3.11-slim-bookworm
 
 # ViennaRNA (RNAfold via subprocess in feature_compute.py)
 # curl required by the HEALTHCHECK command
+# viennarna is the correct package name in Debian Bookworm (12)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        viennarna-common \
-        viennarna-utils \
+        viennarna \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
