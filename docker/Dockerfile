@@ -3,7 +3,8 @@ FROM python:3.11-slim
 # ViennaRNA (RNAfold via subprocess in feature_compute.py)
 # curl required by the HEALTHCHECK command
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        viennarna \
+        viennarna-common \
+        viennarna-utils \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
