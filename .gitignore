@@ -49,3 +49,5 @@ logs/*_nohup.log
 
 # MLflow run artifacts (regenerable by running 10b_mlflow_retroactive.py)
 mlruns/
+.coverage
+htmlcov/
