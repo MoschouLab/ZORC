@@ -1,3 +1,13 @@
+# ZORC P-body Prediction API — moschoulab/zorc-predictor:1.0
+#
+# Multi-stage build required for ViennaRNA (RNAfold):
+#   - Not available in Debian apt (Bookworm or Trixie)
+#   - PyPI wheel does not bundle the RNAfold binary on Linux x86_64
+#   - conda-forge package unavailable outside a conda environment
+#   Solution: compile ViennaRNA 2.6.4 from source in a builder stage,
+#   copy only the RNAfold binary + libgsl27 runtime into the final image.
+#   ca-certificates required in the builder (debian:bookworm-slim ships without it).
+
 # ── Stage 1: compile ViennaRNA from source ────────────────────────────────────
 FROM debian:bookworm-slim AS viennarna-builder
 
