@@ -39,6 +39,7 @@ Predictive ML pipeline for P-body mRNA enrichment in *Arabidopsis thaliana*.
 | P12d | Docker (`moschoulab/zorc-predictor:1.0`, ViennaRNA from source) | ✅ complete | `docker/Dockerfile` |
 | P12e | GitHub Actions CI (lint + test + docker-build) | ✅ complete | `.github/workflows/ci.yml` |
 | P12f | EvidentlyAI + Prometheus monitoring | ✅ complete | `monitoring/`, `scripts/10c_evidently_report.py` |
+| P14a | ChromaDB + LangChain RAG (10 PDFs, 1244 vectors) | ✅ complete | `agent/ingest.py`, `agent/rag_query.py`, `agent/notebook_rag.ipynb` |
 
 ---
 
@@ -154,38 +155,76 @@ evidently 0.7 cambió la API respecto a 0.4:
 
 ---
 
-## Tarea actual — P14a: ChromaDB + LangChain RAG
+## P14a — Completado (2026-04-24)
 
-Siguiente paso según `docs/ZORC_P10_P14_architecture.md` §P14a:
+### Deliverables entregados
+- `agent/ingest.py` — ingesta 10 PDFs desde `data/papers/` con PyPDFLoader +
+  RecursiveCharacterTextSplitter (chunk_size=1000, overlap=200);
+  embeddings locales `sentence-transformers/all-MiniLM-L6-v2`;
+  persiste 1244 vectores en `agent/chroma_db/` (ChromaDB, gitignored)
+- `agent/rag_query.py` — función `query_literature(question, k)` que devuelve
+  top-k chunks con rank, cosine similarity, PDF source y número de página;
+  módulo importable + CLI con `--demo` para las 3 queries estándar
+- `agent/notebook_rag.ipynb` — demo ejecutado: 3 queries + score plot
+- `agent/ingest_manifest.json` — metadata del corpus (chunks por fuente)
+- `data/papers/` — 10 PDFs tracked en git
+- Commit: `a4cd868 feat(P14a): add ChromaDB + LangChain RAG over P-body literature`
 
-### P14a — RAG: P-body Literature Knowledge Base
+### Nota técnica: LangChain 1.x imports
+LangChain 1.x cambió los imports respecto a 0.2:
+- Embeddings: `from langchain_huggingface import HuggingFaceEmbeddings`
+- Vector store: `from langchain_chroma import Chroma`
+- Paquetes requeridos: `langchain-huggingface`, `langchain-chroma` (además de `langchain-community`)
 
-**Script:** `agent/literature_agent.py`
+### Corpus (10 PDFs, 231 páginas, 1244 chunks)
+| Fichero | Chunks |
+|---------|--------|
+| 2025_PLANT-COMMUNICATIONS-D-25-01149... | 297 |
+| journal.pbio.3002305.pdf | 229 |
+| Bio-protocol5587.pdf | 147 |
+| TPC_paper.pdf | 143 |
+| embj.2022111885.pdf | 139 |
+| koad127.pdf | 97 |
+| 1-s2.0-S0006349525034472-main.pdf | 88 |
+| 1-s2.0-S1360138523001322-main.pdf | 61 |
+| erac497.pdf | 32 |
+| s41422-025-01133-4.pdf | 11 |
 
-```bash
-conda activate zorc_pipeline
-pip install chromadb langchain langchain-community anthropic
-python agent/literature_agent.py
-```
+---
 
-Pasos:
-1. Descargar ~500 abstracts de PubMed (Entrez API) — papers citando Liu 2024 + Liu 2023
-2. Indexar en ChromaDB con embeddings SPECTER (`allenai-specter`)
-3. RAG queries via LangChain + Anthropic API (Claude Sonnet 4.6)
-4. Guardar vectorstore en `agent/chroma_db/` (gitignored)
+## Tarea actual — P14b: LangGraph ZORC Agent
+
+Siguiente paso según `docs/ZORC_P10_P14_architecture.md` §P14b:
 
 ### P14b — LangGraph: ZORC prediction + literature agent
 
 **Script:** `agent/zorc_agent.py`
 
 Workflow LangGraph:
-`START → get_prediction (ZORC API) → retrieve_literature (ChromaDB) → generate_report (Claude) → END`
+`START → get_prediction (ZORC FastAPI /predict) → retrieve_literature (ChromaDB, usa agent/rag_query.py) → generate_report (Claude Sonnet 4.6 via Anthropic API) → END`
+
+Pasos:
+1. Instalar `langgraph` (ya instalado como dep de langchain) + `anthropic`
+2. `agent/zorc_agent.py` — StateGraph con 3 nodos:
+   - `get_prediction`: llama a FastAPI localhost:8000/predict con gene_id
+   - `retrieve_literature`: llama a `query_literature()` con el gene + prob
+   - `generate_report`: construye prompt + llama a Claude Sonnet 4.6
+3. Conditional edge: si prob > 0.8 → retrieve_literature, si no → generate_report directo
+4. `notebooks/03_zorc_agent_demo.ipynb` — demo con 3 genes (AT1G01470, AT3G22270, AT5G47010)
+5. Commit tras verificar demo
+
+```bash
+conda activate zorc_pipeline
+pip install anthropic
+# Necesita ANTHROPIC_API_KEY en entorno
+uvicorn api.main:app --port 8000 &  # FastAPI debe estar corriendo
+python agent/zorc_agent.py AT1G01470
+```
 
 ---
 
 ## Pending
 
-- **P14a** — ChromaDB + LangChain RAG on P-body literature (`agent/literature_agent.py`)
 - **P14b** — LangGraph multi-step ZORC prediction + literature agent (`agent/zorc_agent.py`)
 - **P13** — Xenium 10X probe design + facility submission (manual, before summer 2026)
 
@@ -248,4 +287,4 @@ Workflow LangGraph:
 
 ---
 
-*Prompt updated: 2026-04-24 · Pipeline state: P1–P12f complete · Next: P14a (ChromaDB + LangChain RAG)*
+*Prompt updated: 2026-04-24 · Pipeline state: P1–P12f + P14a complete · Next: P14b (LangGraph ZORC Agent)*
