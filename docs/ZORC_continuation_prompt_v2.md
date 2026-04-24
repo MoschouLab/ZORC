@@ -30,9 +30,15 @@ Predictive ML pipeline for P-body mRNA enrichment in *Arabidopsis thaliana*.
 | P6 | `06_bioemu_batch.py` | ✅ complete | `data/processed/bioemu/` (checkpoint.json) |
 | P7 | `07_protein_features.py` | ✅ complete | `data/processed/07_protein_features.csv` |
 | P8 | `08_feature_matrix.py` | ✅ complete | `data/processed/08_zorc_feature_matrix.csv` |
-| P9 | `09_random_forest.py` | ✅ complete | `results/09_zorc_rf_model.pkl` |
-| P10 | Snakemake + GitHub | 🔄 pending | MoschouLab/ZORC |
-| P11 | Xenium 10X validation | 🔄 pending | probe design → external facility |
+| P9–P9f | `09_random_forest.py` … `09f_final_model.py` | ✅ complete | `results/09f_rf_final_model.pkl` |
+| P10 | Snakemake workflow (15 rules) + `pipeline_dag.png` | ✅ complete | `Snakefile` |
+| P11a–d | SQLite+DuckDB+notebooks, Streamlit, Dash, Tableau CSVs | ✅ complete | `dashboard/`, `notebooks/` |
+| P12a | MLflow (6 runs retroactive) | ✅ complete | `mlruns/` |
+| P12b | DVC (9 artefacts) | ✅ complete | `dvc/` |
+| P12c | FastAPI (`/health`, `/predict`, `/lookup`) | ✅ complete | `api/main.py` |
+| P12d | Docker (`moschoulab/zorc-predictor:1.0`, ViennaRNA from source) | ✅ complete | `docker/Dockerfile` |
+| P12e | GitHub Actions CI (lint + test + docker-build) | ✅ complete | `.github/workflows/ci.yml` |
+| P12f | EvidentlyAI + Prometheus monitoring | 🔄 next | `monitoring/` |
 
 ---
 
@@ -115,53 +121,66 @@ for dynamic features, diluting their SHAP contributions by ~50%.
 
 ---
 
-## Immediate next steps (priority order)
+## P12e — CI/CD summary (completed 2026-04-24)
 
-### NEXT SESSION — Step 1: XGBoost benchmark
+- **47 tests** across `tests/test_pipeline.py` (31) and `tests/test_api.py` (16)
+- **86% coverage** on `api/` (well above 60% minimum)
+- **3 CI jobs:** `lint` (ruff --select=E,F on api/ + tests/), `test` (pytest --cov),
+  `docker-build` (multi-stage Dockerfile, no push)
+- RNAfold mocked via `unittest.mock.patch` — tests run without ViennaRNA in runner
+- `requirements.txt` added at repo root (pip-compatible, no conda-only packages)
+- CI badge active in `README.md`
+
+---
+
+## Tarea actual — P12f: EvidentlyAI + Prometheus
+
+Siguiente paso según `docs/ZORC_P10_P14_architecture.md` §P12f:
+
+### P12f-a — EvidentlyAI data drift report
+
+**Script:** `scripts/10c_evidently_report.py`
+
 ```bash
 conda activate zorc_pipeline
-pip install xgboost
-cd ~/Documents/ZORC
-python scripts/09b_xgboost.py --config config/zorc_config.yaml
+pip install evidently
+python scripts/10c_evidently_report.py --config config/zorc_config.yaml
 ```
-- XGBoost handles NaN natively (no imputation needed)
-- If rmsf_mean/rg_mean rank higher in XGBoost SHAP → confirms imputation bias in RF
-- Expected: +0.03–0.06 AUROC improvement over RF baseline
-- Script to be written in new session
 
-### Step 2: AF2 structure recovery for Tier 1
-- P7 attempted EBI API fetch but silently failed for most proteins
-- Fix UniProt ID mapping → download AF2 PDBs → extract Rg/contact_density
-- Recovers real structural values for ~698 proteins without additional GPU compute
-- Expected: eliminates ~350 samples from imputation pool
+Generates HTML reports in `monitoring/evidently_reports/`:
+- `DataDriftPreset` — training vs new prediction requests feature distribution
+- `DataQualityPreset` — missing values, outliers
+- Reference = `data/processed/08_zorc_feature_matrix.csv` (X_train split)
+- Current = synthetic batch of 50 random genes from the test split
 
-### Step 3: BioEmu for Tier 1 (only if Step 2 insufficient)
-- Run BioEmu on 698 Tier 1 proteins (IDR<10%, ~50 conformations each)
-- GPU time: ~3-4 days on RTX A5000
-- Only justified if SHAP post-XGBoost confirms dynamic features are critical
+### P12f-b — Prometheus metrics in FastAPI
 
-### Step 4: Feature engineering
-- `rmsf_nterm50 / rmsf_cterm50` ratio
-- `idr_percent × rrach_per_kb` interaction term
-- `cds_length_per_exon`
+Add to `api/main.py` (5 lines):
 
-### Step 5: Hyperparameter tuning (after dataset completion)
-- Grid search over max_depth, min_samples_leaf, max_features
-- Expected gain: +0.02–0.04 AUROC
+```python
+from prometheus_fastapi_instrumentator import Instrumentator
+Instrumentator().instrument(app).expose(app)
+# Metrics available at GET /metrics
+```
 
-### Step 6: P10 — Snakemake + GitHub (MoschouLab/ZORC)
-**Planned tool:** VS Code + Claude Code
-- Install Claude Code on ThinkStation P5 when starting P10
-- Use `curl -fsSL https://claude.ai/install.sh | bash` (Linux)
-- Claude Code will have direct access to ~/Documents/ZORC/ repo
-- Tasks: convert scripts to Snakemake rules, complete README, publish to GitHub, obtain Zenodo DOI
-- See `docs/ZORC_methodological_decisions.md` Section 11 for Snakemake plan
+Install: `pip install prometheus-fastapi-instrumentator`
 
-### Step 7: P11 — Xenium 10X Spatial Transcriptomics validation
-- Probe design for top predicted P-body mRNAs
-- Start with the 25 high-confidence genes: `data/processed/colleague_high_confidence_set.csv`
-- Send samples to external 10X Genomics facility BEFORE summer 2026
-- Analysis: spot detection, co-localisation with DCP1-GFP marker
+Create `monitoring/prometheus_config.yml` for local scraping.
+
+### Deliverables
+- `scripts/10c_evidently_report.py`
+- `monitoring/evidently_reports/drift_report.html`
+- `monitoring/prometheus_config.yml`
+- Updated `api/main.py` with Prometheus instrumentation
+- Commit: `feat(monitoring): add EvidentlyAI drift report and Prometheus metrics`
+
+---
+
+## Pending after P12f
+
+- **P14a** — ChromaDB + LangChain RAG on P-body literature (`agent/literature_agent.py`)
+- **P14b** — LangGraph multi-step ZORC prediction + literature agent (`agent/zorc_agent.py`)
+- **P13** — Xenium 10X probe design + facility submission (manual, before summer 2026)
 
 ---
 
@@ -222,4 +241,4 @@ python scripts/09b_xgboost.py --config config/zorc_config.yaml
 
 ---
 
-*Prompt generated: 2026-04-07 · Pipeline state: P1–P9 complete, P10–P11 pending*
+*Prompt updated: 2026-04-24 · Pipeline state: P1–P12e complete · Next: P12f (EvidentlyAI + Prometheus)*
