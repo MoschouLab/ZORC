@@ -1,0 +1,23 @@
+# Prometheus scrape configuration for ZORC FastAPI prediction service.
+# Run Prometheus locally:
+#   docker run -p 9090:9090 \
+#     -v $(pwd)/monitoring/prometheus_config.yml:/etc/prometheus/prometheus.yml \
+#     prom/prometheus
+# Then open http://localhost:9090
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: zorc_api
+    static_configs:
+      - targets:
+          - localhost:8000
+    metrics_path: /metrics
+    # Key metrics exposed by prometheus-fastapi-instrumentator:
+    #   http_requests_total{method, handler, status}  — request counter
+    #   http_request_duration_seconds{handler}        — latency histogram
+    #   http_requests_inprogress{method, handler}     — in-flight gauge
+    # Custom ZORC metric:
+    #   zorc_model_loaded                             — 1 when model is ready

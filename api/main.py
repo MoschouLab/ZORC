@@ -29,6 +29,8 @@ from typing import Optional
 import numpy as np
 import shap
 from fastapi import FastAPI, HTTPException
+from prometheus_client import Gauge
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel, Field
 
 from api.feature_compute import compute_features
@@ -40,6 +42,13 @@ _REPO_ROOT  = _HERE.parent
 _MODEL_PATH   = _REPO_ROOT / "results" / "09d_rf_eng_model.pkl"
 _MEDIANS_PATH = _HERE / "imputation_medians.json"
 _DB_PATH      = _REPO_ROOT / "data" / "zorc_database.db"
+
+# ── Prometheus metrics ────────────────────────────────────────────────────────
+
+_model_loaded_gauge = Gauge(
+    "zorc_model_loaded",
+    "1 when the ZORC RandomForest model is loaded and ready, 0 otherwise",
+)
 
 # ── Global model state ────────────────────────────────────────────────────────
 
@@ -61,6 +70,7 @@ def _load_state() -> None:
     _state["explainer"] = shap.TreeExplainer(_state["model"])
 
     n = len(_state["feature_order"])
+    _model_loaded_gauge.set(1)
     print(f"[ZORC API] Model loaded: {_MODEL_PATH.name}  |  {n} features")
 
 
@@ -82,6 +92,10 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+# Expose /metrics endpoint (Prometheus scrape target).
+# Tracks: request count, latency histogram, in-progress requests, response codes.
+Instrumentator().instrument(app).expose(app)
 
 # ── Request / Response models ─────────────────────────────────────────────────
 

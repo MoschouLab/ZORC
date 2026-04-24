@@ -51,3 +51,8 @@ logs/*_nohup.log
 mlruns/
 .coverage
 htmlcov/
+
+# EvidentlyAI reports (regenerable by running scripts/10c_evidently_report.py)
+# Keep the .gitkeep placeholder; exclude generated HTMLs
+monitoring/evidently_reports/*.html
+monitoring/evidently_reports/*.json

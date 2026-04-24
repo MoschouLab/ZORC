@@ -41,6 +41,48 @@ Final model: RandomForestClassifier (500 trees, Platt-calibrated), 63 features
 | P12c | FastAPI prediction service | ✅ complete |
 | P12d | Docker image (moschoulab/zorc-predictor:1.0) | ✅ complete |
 | P12e | GitHub Actions CI/CD | ✅ complete |
+| P12f | EvidentlyAI drift reports + Prometheus metrics | ✅ complete |
+
+## Monitoring
+
+### Data drift reports (EvidentlyAI)
+
+```bash
+conda activate zorc_pipeline
+pip install evidently
+python scripts/10c_evidently_report.py --config config/zorc_config.yaml
+# Reports saved to monitoring/evidently_reports/
+#   drift_report.html          — feature distribution shift (train vs test)
+#   quality_report.html        — missing values, outliers, data summary
+#   classification_report.html — F1, ROC-AUC, precision/recall on test split
+```
+
+### API metrics (Prometheus)
+
+The FastAPI service exposes a `/metrics` endpoint (Prometheus text format):
+
+```bash
+# Start the API
+uvicorn api.main:app --port 8000
+
+# Scrape metrics manually
+curl http://localhost:8000/metrics | grep zorc_model_loaded
+# zorc_model_loaded 1.0
+
+# Key metrics:
+#   zorc_model_loaded              — 1 when RF model is loaded
+#   http_requests_total{handler}   — per-endpoint request counter
+#   http_request_duration_seconds  — latency histogram
+```
+
+Run Prometheus locally with the provided config:
+
+```bash
+docker run -p 9090:9090 \
+  -v $(pwd)/monitoring/prometheus_config.yml:/etc/prometheus/prometheus.yml \
+  prom/prometheus
+# Dashboard: http://localhost:9090
+```
 
 ## Environments
 
