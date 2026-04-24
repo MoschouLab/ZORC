@@ -56,3 +56,6 @@ htmlcov/
 # Keep the .gitkeep placeholder; exclude generated HTMLs
 monitoring/evidently_reports/*.html
 monitoring/evidently_reports/*.json
+
+# ChromaDB vector store (regenerable by running agent/ingest.py)
+agent/chroma_db/
