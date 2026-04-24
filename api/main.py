@@ -20,7 +20,6 @@ Swagger UI:  http://localhost:8000/docs
 """
 
 import json
-import os
 import pickle
 import sqlite3
 from contextlib import asynccontextmanager
@@ -32,7 +31,7 @@ import shap
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from api.feature_compute import compute_features, PROTEIN_FEATURE_NAMES
+from api.feature_compute import compute_features
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 

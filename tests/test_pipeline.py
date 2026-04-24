@@ -7,7 +7,6 @@ are mocked so these tests run without ViennaRNA installed (CI environment).
 
 import pytest
 from unittest.mock import patch, MagicMock
-from collections import Counter
 
 from api.feature_compute import (
     _to_rna,

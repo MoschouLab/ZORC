@@ -5,7 +5,6 @@ The model, SHAP explainer, and feature medians are mocked so these tests run
 without requiring the trained model artefacts or ViennaRNA in the CI environment.
 """
 
-import json
 import numpy as np
 import pytest
 from unittest.mock import patch, MagicMock
