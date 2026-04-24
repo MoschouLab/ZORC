@@ -38,7 +38,7 @@ Predictive ML pipeline for P-body mRNA enrichment in *Arabidopsis thaliana*.
 | P12c | FastAPI (`/health`, `/predict`, `/lookup`) | ✅ complete | `api/main.py` |
 | P12d | Docker (`moschoulab/zorc-predictor:1.0`, ViennaRNA from source) | ✅ complete | `docker/Dockerfile` |
 | P12e | GitHub Actions CI (lint + test + docker-build) | ✅ complete | `.github/workflows/ci.yml` |
-| P12f | EvidentlyAI + Prometheus monitoring | 🔄 next | `monitoring/` |
+| P12f | EvidentlyAI + Prometheus monitoring | ✅ complete | `monitoring/`, `scripts/10c_evidently_report.py` |
 
 ---
 
@@ -133,50 +133,57 @@ for dynamic features, diluting their SHAP contributions by ~50%.
 
 ---
 
-## Tarea actual — P12f: EvidentlyAI + Prometheus
+## P12f — Completado (2026-04-24)
 
-Siguiente paso según `docs/ZORC_P10_P14_architecture.md` §P12f:
+### Deliverables entregados
+- `scripts/10c_evidently_report.py` — genera 3 reports HTML con evidently 0.7 API:
+  - `monitoring/evidently_reports/drift_report.html` (7.5 MB)
+  - `monitoring/evidently_reports/quality_report.html` (4.2 MB)
+  - `monitoring/evidently_reports/classification_report.html` (3.6 MB)
+- `api/main.py` — instrumentado con `prometheus-fastapi-instrumentator`;
+  endpoint `/metrics` activo; gauge `zorc_model_loaded=1.0` en startup
+- `monitoring/prometheus_config.yml` — scrape config para localhost:8000/metrics
+- Commit: `60deb0d feat(monitoring): add EvidentlyAI drift reports and Prometheus API metrics`
 
-### P12f-a — EvidentlyAI data drift report
-
-**Script:** `scripts/10c_evidently_report.py`
-
-```bash
-conda activate zorc_pipeline
-pip install evidently
-python scripts/10c_evidently_report.py --config config/zorc_config.yaml
-```
-
-Generates HTML reports in `monitoring/evidently_reports/`:
-- `DataDriftPreset` — training vs new prediction requests feature distribution
-- `DataQualityPreset` — missing values, outliers
-- Reference = `data/processed/08_zorc_feature_matrix.csv` (X_train split)
-- Current = synthetic batch of 50 random genes from the test split
-
-### P12f-b — Prometheus metrics in FastAPI
-
-Add to `api/main.py` (5 lines):
-
-```python
-from prometheus_fastapi_instrumentator import Instrumentator
-Instrumentator().instrument(app).expose(app)
-# Metrics available at GET /metrics
-```
-
-Install: `pip install prometheus-fastapi-instrumentator`
-
-Create `monitoring/prometheus_config.yml` for local scraping.
-
-### Deliverables
-- `scripts/10c_evidently_report.py`
-- `monitoring/evidently_reports/drift_report.html`
-- `monitoring/prometheus_config.yml`
-- Updated `api/main.py` with Prometheus instrumentation
-- Commit: `feat(monitoring): add EvidentlyAI drift report and Prometheus metrics`
+### Nota técnica: evidently 0.7 API
+evidently 0.7 cambió la API respecto a 0.4:
+- Presets: `from evidently.presets import DataDriftPreset, DataSummaryPreset, ClassificationPreset`
+- `Report.run()` retorna un `Snapshot` con `save_html()`
+- `ClassificationPreset` requiere `DataDefinition(classification=[BinaryClassification(...)])`
+  pasado via `Dataset.from_pandas(df, data_definition=dd)`
 
 ---
 
-## Pending after P12f
+## Tarea actual — P14a: ChromaDB + LangChain RAG
+
+Siguiente paso según `docs/ZORC_P10_P14_architecture.md` §P14a:
+
+### P14a — RAG: P-body Literature Knowledge Base
+
+**Script:** `agent/literature_agent.py`
+
+```bash
+conda activate zorc_pipeline
+pip install chromadb langchain langchain-community anthropic
+python agent/literature_agent.py
+```
+
+Pasos:
+1. Descargar ~500 abstracts de PubMed (Entrez API) — papers citando Liu 2024 + Liu 2023
+2. Indexar en ChromaDB con embeddings SPECTER (`allenai-specter`)
+3. RAG queries via LangChain + Anthropic API (Claude Sonnet 4.6)
+4. Guardar vectorstore en `agent/chroma_db/` (gitignored)
+
+### P14b — LangGraph: ZORC prediction + literature agent
+
+**Script:** `agent/zorc_agent.py`
+
+Workflow LangGraph:
+`START → get_prediction (ZORC API) → retrieve_literature (ChromaDB) → generate_report (Claude) → END`
+
+---
+
+## Pending
 
 - **P14a** — ChromaDB + LangChain RAG on P-body literature (`agent/literature_agent.py`)
 - **P14b** — LangGraph multi-step ZORC prediction + literature agent (`agent/zorc_agent.py`)
@@ -241,4 +248,4 @@ Create `monitoring/prometheus_config.yml` for local scraping.
 
 ---
 
-*Prompt updated: 2026-04-24 · Pipeline state: P1–P12e complete · Next: P12f (EvidentlyAI + Prometheus)*
+*Prompt updated: 2026-04-24 · Pipeline state: P1–P12f complete · Next: P14a (ChromaDB + LangChain RAG)*
