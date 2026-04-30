@@ -1,5 +1,5 @@
 {
-  "total_chunks": 1244,
+  "total_chunks": 1460,
   "embed_model": "sentence-transformers/all-MiniLM-L6-v2",
   "chunk_size": 1000,
   "chunk_overlap": 200,
@@ -8,6 +8,7 @@
     "1-s2.0-S0006349525034472-main.pdf": 138,
     "1-s2.0-S1360138523001322-main.pdf": 80,
     "2025_PLANT-COMMUNICATIONS-D-25-01149_MANUSCRIPT_FILE_REV1_FINAL.pdf": 193,
+    "Advanced Science - 2026 - Moschou - Sensing and Filtering Environmental Fluctuations The Case of Biomolecular Condensates.pdf": 216,
     "Bio-protocol5587.pdf": 98,
     "TPC_paper.pdf": 175,
     "embj.2022111885.pdf": 159,
