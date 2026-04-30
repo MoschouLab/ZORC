@@ -18,7 +18,7 @@ Predictive ML pipeline for P-body mRNA enrichment in *Arabidopsis thaliana*.
 
 ---
 
-## Pipeline status (as of April 2026)
+## Pipeline status (as of 2026-04-30 — PORTFOLIO COMPLETO)
 
 | Phase | Script | Status | Key output |
 |-------|--------|--------|------------|
@@ -229,10 +229,44 @@ python agent/run_agent.py AT5G47010
 
 ---
 
-## Pending
+## PORTFOLIO COMPLETO — 2026-04-30
 
+El portfolio computacional ZORC está terminado. Todas las fases de software completadas.
+
+### Resumen de habilidades demostradas
+
+| Área | Fases | Herramientas clave |
+|------|-------|--------------------|
+| ML end-to-end | P1–P9f | scikit-learn, XGBoost, SHAP, Platt calibration |
+| Bioinformatics pipeline | P1–P8 | BioEmu, AIUPred, RNAfold, MDAnalysis, gffread |
+| Workflow reproducibility | P10 | Snakemake (15 rules), conda env directives |
+| Data Analytics | P11a–d | SQLite, DuckDB, Streamlit, Plotly Dash, Tableau |
+| MLOps | P12a–b | MLflow (6 runs), DVC (9 artefacts) |
+| ML Engineering | P12c–e | FastAPI, Docker Hub, GitHub Actions CI (47 tests, 86% cov) |
+| Monitoring | P12f | EvidentlyAI (3 HTML reports), Prometheus /metrics |
+| Generative AI / RAG | P14a | ChromaDB, LangChain 1.x, all-MiniLM-L6-v2, 1244 chunks |
+| LLM Agents | P14b | LangGraph 1.1.9 StateGraph, Anthropic SDK, conditional routing |
+
+### Métricas finales del modelo (P9f)
+```
+RandomForestClassifier — 500 trees — Platt calibrated
+Test AUROC  : 0.7963
+Test AUPRC  : 0.8431
+Test F1-macro: 0.7229 (F1-pos=0.7904, F1-neg=0.6554)
+HC validation: 24/25 (96%) — lab-curated high-confidence P-body genes
+Dataset     : 1,510 genes × 63 features (41 RNA + 18 protein/IDR + 4 engineered)
+```
+
+### Commits clave
+```
+37fb5e5  feat(P14b): LangGraph ZORC agent
+a4cd868  feat(P14a): ChromaDB + LangChain RAG
+60deb0d  feat(monitoring): EvidentlyAI + Prometheus
+64c85fa  chore: coverage artifacts gitignore
+```
+
+### Pendiente (no computacional)
 - **P13** — Xenium 10X probe design + facility submission (manual, before summer 2026)
-- **Portfolio completo**: P1–P9f + P10 + P11a–d + P12a–f + P14a–b ✅
 
 ---
 
@@ -293,4 +327,4 @@ python agent/run_agent.py AT5G47010
 
 ---
 
-*Prompt updated: 2026-04-30 · Pipeline state: P1–P12f + P14a–b complete · Portfolio ZORC finished · Next: P13 (Xenium probe design, manual)*
+*Prompt updated: 2026-04-30 · **PORTFOLIO COMPLETO** · P1–P9f + P10 + P11a–d + P12a–f + P14a–b ✅ · Pendiente solo P13 (manual, Xenium)*
