@@ -74,8 +74,18 @@ def query_literature(question: str, k: int = DEFAULT_K) -> list[dict[str, Any]]:
     vs = _load_vectorstore()
     results = vs.similarity_search_with_relevance_scores(question, k=k)
 
+    # Deduplicate by exact text content, keeping the highest-score copy.
+    # ChromaDB returns results ordered by score (desc), so the first occurrence
+    # of any text is already the best one; later duplicates are simply skipped.
+    seen: set[str] = set()
+    deduped = []
+    for doc, score in results:
+        if doc.page_content not in seen:
+            seen.add(doc.page_content)
+            deduped.append((doc, score))
+
     hits = []
-    for rank, (doc, score) in enumerate(results, start=1):
+    for rank, (doc, score) in enumerate(deduped, start=1):
         hits.append(
             {
                 "rank": rank,
