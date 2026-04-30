@@ -40,6 +40,7 @@ Predictive ML pipeline for P-body mRNA enrichment in *Arabidopsis thaliana*.
 | P12e | GitHub Actions CI (lint + test + docker-build) | ✅ complete | `.github/workflows/ci.yml` |
 | P12f | EvidentlyAI + Prometheus monitoring | ✅ complete | `monitoring/`, `scripts/10c_evidently_report.py` |
 | P14a | ChromaDB + LangChain RAG (10 PDFs, 1244 vectors) | ✅ complete | `agent/ingest.py`, `agent/rag_query.py`, `agent/notebook_rag.ipynb` |
+| P14b | LangGraph agent (3 nodes + conditional edge, Claude claude-sonnet-4-6) | ✅ complete | `agent/zorc_agent.py`, `agent/run_agent.py`, `agent/notebook_agent.ipynb` |
 
 ---
 
@@ -192,41 +193,46 @@ LangChain 1.x cambió los imports respecto a 0.2:
 
 ---
 
-## Tarea actual — P14b: LangGraph ZORC Agent
+## P14b — Completado (2026-04-30)
 
-Siguiente paso según `docs/ZORC_P10_P14_architecture.md` §P14b:
+### Deliverables entregados
+- `agent/zorc_agent.py` — StateGraph LangGraph 1.1.9 con 3 nodos:
+  - `get_prediction`: FastAPI `/lookup/{gene_id}` → SQLite fallback directo
+  - `retrieve_literature`: `query_literature()` de P14a, k=5 chunks
+  - `generate_report`: Claude claude-sonnet-4-6 via Anthropic SDK 0.97
+  - Conditional edge: `prob_pos > 0.8` → `retrieve_literature`, else → `generate_report` directo
+  - Fallback graceful si `ANTHROPIC_API_KEY` no está en entorno
+- `agent/run_agent.py` — CLI: `python agent/run_agent.py AT5G47010`
+  - Flags: `--no-llm`, `--json`
+  - Multi-gene: `python agent/run_agent.py AT5G47010 AT3G22270 AT1G01470`
+- `agent/notebook_agent.ipynb` — demo con 3 genes (AT5G47010, AT1G01470, AT3G22270)
 
-### P14b — LangGraph: ZORC prediction + literature agent
+### Verificación (sin API key, FastAPI activa)
+```
+AT5G47010: prob=0.9303, pred=enriched, conf=high, lit=5 chunks (ruta completa)
+AT1G01470: prob=0.2525, pred=not_enriched, conf=low, lit=0 chunks (ruta directa)
+```
 
-**Script:** `agent/zorc_agent.py`
-
-Workflow LangGraph:
-`START → get_prediction (ZORC FastAPI /predict) → retrieve_literature (ChromaDB, usa agent/rag_query.py) → generate_report (Claude Sonnet 4.6 via Anthropic API) → END`
-
-Pasos:
-1. Instalar `langgraph` (ya instalado como dep de langchain) + `anthropic`
-2. `agent/zorc_agent.py` — StateGraph con 3 nodos:
-   - `get_prediction`: llama a FastAPI localhost:8000/predict con gene_id
-   - `retrieve_literature`: llama a `query_literature()` con el gene + prob
-   - `generate_report`: construye prompt + llama a Claude Sonnet 4.6
-3. Conditional edge: si prob > 0.8 → retrieve_literature, si no → generate_report directo
-4. `notebooks/03_zorc_agent_demo.ipynb` — demo con 3 genes (AT1G01470, AT3G22270, AT5G47010)
-5. Commit tras verificar demo
-
+### Para activar LLM completo
 ```bash
 conda activate zorc_pipeline
-pip install anthropic
-# Necesita ANTHROPIC_API_KEY en entorno
-uvicorn api.main:app --port 8000 &  # FastAPI debe estar corriendo
-python agent/zorc_agent.py AT1G01470
+export ANTHROPIC_API_KEY=sk-ant-...
+uvicorn api.main:app --port 8000 &
+python agent/run_agent.py AT5G47010
 ```
+
+### Nota técnica: LangGraph 1.1.9 API
+- `StateGraph(TypedDict)` — `total=False` para campos opcionales del estado
+- `workflow.add_conditional_edges(source, fn, {label: dest})` — routing function retorna string
+- `agent.get_graph().nodes.keys()` — introspección del grafo
+- `agent.get_graph().draw_mermaid_png()` — visualización (requiere pillow)
 
 ---
 
 ## Pending
 
-- **P14b** — LangGraph multi-step ZORC prediction + literature agent (`agent/zorc_agent.py`)
 - **P13** — Xenium 10X probe design + facility submission (manual, before summer 2026)
+- **Portfolio completo**: P1–P9f + P10 + P11a–d + P12a–f + P14a–b ✅
 
 ---
 
@@ -287,4 +293,4 @@ python agent/zorc_agent.py AT1G01470
 
 ---
 
-*Prompt updated: 2026-04-24 · Pipeline state: P1–P12f + P14a complete · Next: P14b (LangGraph ZORC Agent)*
+*Prompt updated: 2026-04-30 · Pipeline state: P1–P12f + P14a–b complete · Portfolio ZORC finished · Next: P13 (Xenium probe design, manual)*
