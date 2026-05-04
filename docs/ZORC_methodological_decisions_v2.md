@@ -327,7 +327,7 @@ Only miss: AT3G55280 (RPL23aB), P(pos)=0.42 — biologically ambiguous.
 Notable genes: PAT1 (AT3G22270, AT4G14990), LBA1/UPF1 (AT5G47010),
 EF1B (AT5G53330), VPS28 (AT4G05000), ATG6 (AT3G61710).
 
-Primary candidates for Xenium 10X probe panel design (P11).
+Primary candidates for spatial transcriptomics validation (P13).
 
 ---
 

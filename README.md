@@ -35,7 +35,7 @@ Final model: RandomForestClassifier (500 trees, Platt-calibrated), 63 features
 | P8 | `08_feature_matrix.py` | ✅ complete |
 | P9–P9f | `09_random_forest.py` … `09f_final_model.py` | ✅ complete |
 | P10 | Snakemake workflow | ✅ complete |
-| P11a–d | SQLite/DuckDB, Streamlit, Dash, Tableau | ✅ complete |
+| P11a–d | SQLite/DuckDB, Streamlit, Dash, Tableau CSVs prepared for import | ✅ complete |
 | P12a | MLflow experiment tracking | ✅ complete |
 | P12b | DVC data & model versioning | ✅ complete |
 | P12c | FastAPI prediction service | ✅ complete |

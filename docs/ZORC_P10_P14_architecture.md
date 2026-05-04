@@ -46,7 +46,7 @@ full-stack Data Analyst / AI / ML Engineer portfolio project.
 | Jupyter notebooks | P11a | SQL exploration notebook |
 | Streamlit | P11b | Gene Explorer lab tool |
 | Plotly Dash | P11c | ML analytical dashboard |
-| Tableau Public | P11d | 3 publication-quality dashboards |
+| Tableau | P11d | CSVs prepared for Tableau Public import (01_feature_importance.csv, 02_probability_landscape.csv, 03_pipeline_history.csv) |
 | MLflow | P12a | All 6 model runs tracked retroactively |
 | DVC | P12b | Feature matrix + model versioning |
 | FastAPI | P12c | `/predict`, `/health`, `/model/info` |
@@ -281,7 +281,7 @@ WHERE f.rmsf_nterm_cterm_ratio > 2.0
   AND f.rrach_per_kb > 30.0
 ORDER BY p.prob_pos DESC;
 
--- Q4: Xenium probe panel candidates
+-- Q4: Spatial transcriptomics validation candidates
 -- High-confidence positives for spatial transcriptomics validation
 WITH ranked AS (
     SELECT g.gene_id, p.prob_pos,
@@ -344,7 +344,7 @@ Three pages:
 - Feature values vs population violin plots (gene highlighted)
 - External links: TAIR, UniProt, AlphaFold2 entry
 
-**Page 2 — Xenium Probe Candidates:** Results of SQL Q4:
+**Page 2 — Spatial Transcriptomics Validation Candidates:** Results of SQL Q4:
 - Table of top 50 candidates by P(pos)
 - Downloadable CSV for probe design submission
 - Feature profiles comparison
@@ -384,11 +384,13 @@ metrics. Selecting a run updates the SHAP panel with that run's
 importance rankings. Connects to MLflow logged artifacts via
 `mlflow.search_runs()`.
 
-### P11d — Tableau Public: Publication Visualizations
+### P11d — Tableau: Publication Visualizations
 
-**Target:** Three permanent public dashboards on tableau.public.com  
-**Workflow:** Export CSVs → Tableau Desktop (Windows/Mac) → Publish  
-**Result:** Public URLs embeddable in README.md and shareable in CV
+**Status:** CSVs prepared for Tableau Public import  
+**Files:**
+- `tableau/01_feature_importance.csv`
+- `tableau/02_probability_landscape.csv`
+- `tableau/03_pipeline_history.csv`
 
 Dashboard 1 — **ZORC Feature Importance:**
 SHAP importance bar chart for final model + scatter plots of top 5
@@ -648,24 +650,33 @@ Datadope's observability domain.
 
 ---
 
-## P13 — Xenium 10X Spatial Transcriptomics Validation
+## P13 — Spatial Transcriptomics Validation
+(STOmics/MERFISH for tissue/cell resolution + expansion microscopy
+with padlock probes for intra-condensate resolution)
 
 **Goal:** Experimental validation of ZORC predictions using spatial
 transcriptomics.  
-**Timeline:** Probe design 1 week → facility submission → turnaround 4–6 weeks
+**Timeline:** Panel design 1 week → facility submission → turnaround 4–6 weeks
+
+> **Xenium descartado** (la precisión de localización de centroides <30nm
+> no equivale a resolución óptica ~250-400nm; amplicons rolling-circle
+> de 200-300nm no resolubles dentro de condensados de 200nm).
+> Plan alternativo: STOmics/MERFISH (resolución tisular/celular) +
+> expansion microscopy + padlock probes (resolución intra-condensado).
 
 ### Candidate selection (SQL query P11a-Q4)
 
 Top 50 genes with P(pos) > 0.85 AND rrach_count > 15.
 Cross-reference with HC validation set (25 genes).
-Final probe panel: ~30 genes prioritised for Xenium design.
+Final panel: ~30 genes prioritised for spatial transcriptomics validation.
 
 ### Experimental setup
 
 - *Arabidopsis thaliana* root cross-sections
 - DCP1-GFP marker line (existing in lab)
 - Conditions: Heat stress (37°C, 1h) vs NS
-- Platform: Xenium In Situ (10X Genomics), external facility
+- Platform: STOmics/MERFISH (tissue/cell resolution) or expansion microscopy
+  with padlock probes (intra-condensate resolution), external facility
 
 ### Success criteria
 
@@ -772,7 +783,7 @@ that can answer questions like "among all Arabidopsis mRNAs predicted
 to condense in P-bodies, which have experimental support from
 independent studies?" — a query that would otherwise require manual
 literature review. This is directly useful for manuscript preparation
-and for prioritising Xenium probe candidates.
+and for prioritising spatial transcriptomics validation candidates.
 
 ---
 
@@ -793,7 +804,7 @@ and for prioritising Xenium probe candidates.
 | P12f | EvidentlyAI + Prometheus | Claude Code | 1 |
 | P14a | ChromaDB + LangChain RAG | Claude Code | 1–2 |
 | P14b | LangGraph agent | Claude Code | 1 |
-| P13 | Xenium probe design + submission | Manual | 1 week |
+| P13 | Spatial transcriptomics validation design + submission | Manual | 1 week |
 
 **Total computational work:** ~3 weeks at normal pace  
 **Result:** Complete Data Analyst + AI/ML Engineer portfolio project

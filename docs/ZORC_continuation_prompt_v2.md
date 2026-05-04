@@ -240,7 +240,7 @@ El portfolio computacional ZORC está terminado. Todas las fases de software com
 | ML end-to-end | P1–P9f | scikit-learn, XGBoost, SHAP, Platt calibration |
 | Bioinformatics pipeline | P1–P8 | BioEmu, AIUPred, RNAfold, MDAnalysis, gffread |
 | Workflow reproducibility | P10 | Snakemake (15 rules), conda env directives |
-| Data Analytics | P11a–d | SQLite, DuckDB, Streamlit, Plotly Dash, Tableau |
+| Data Analytics | P11a–d | SQLite, DuckDB, Streamlit, Plotly Dash, Tableau (CSVs prepared for Tableau Public import) |
 | MLOps | P12a–b | MLflow (6 runs), DVC (9 artefacts) |
 | ML Engineering | P12c–e | FastAPI, Docker Hub, GitHub Actions CI (47 tests, 86% cov) |
 | Monitoring | P12f | EvidentlyAI (3 HTML reports), Prometheus /metrics |
@@ -266,7 +266,7 @@ a4cd868  feat(P14a): ChromaDB + LangChain RAG
 ```
 
 ### Pendiente (no computacional)
-- **P13** — Xenium 10X probe design + facility submission (manual, before summer 2026)
+- **P13** — spatial transcriptomics validation + facility submission (manual, before summer 2026)
 
 ---
 
@@ -327,4 +327,4 @@ a4cd868  feat(P14a): ChromaDB + LangChain RAG
 
 ---
 
-*Prompt updated: 2026-04-30 · **PORTFOLIO COMPLETO** · P1–P9f + P10 + P11a–d + P12a–f + P14a–b ✅ · Pendiente solo P13 (manual, Xenium)*
+*Prompt updated: 2026-04-30 · **PORTFOLIO COMPLETO** · P1–P9f + P10 + P11a–d + P12a–f + P14a–b ✅ · Pendiente solo P13 (manual, spatial transcriptomics)*
