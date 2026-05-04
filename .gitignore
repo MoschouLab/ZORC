@@ -59,3 +59,4 @@ monitoring/evidently_reports/*.json
 
 # ChromaDB vector store (regenerable by running agent/ingest.py)
 agent/chroma_db/
+data/papers/*.pdf
