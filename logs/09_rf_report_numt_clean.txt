@@ -1,0 +1,45 @@
+================================================================================
+ZORC — Random Forest Report
+Script: 09_random_forest.py
+Generated: 2026-05-06 11:06:48
+================================================================================
+
+MODEL CONFIGURATION
+  n_estimators : 500
+  class_weight : balanced
+  max_features : sqrt
+  Features     : 56
+  Imputation   : global median + has_bioemu flag
+
+EVALUATION METRICS
+
+  TRAIN (n=1006)
+    AUROC   : 1.0000
+    AUPRC   : 1.0000
+    F1 pos  : 0.9992
+    F1 neg  : 0.9987
+    F1 macro: 0.9989
+    TP=627  FP=0  TN=378  FN=1
+
+  VAL (n=204)
+    AUROC   : 0.7684
+    AUPRC   : 0.8208
+    F1 pos  : 0.7956
+    F1 neg  : 0.5821
+    F1 macro: 0.6889
+    TP=109  FP=40  TN=39  FN=16
+
+  TEST (n=224)
+    AUROC   : 0.7740
+    AUPRC   : 0.8447
+    F1 pos  : 0.7815
+    F1 neg  : 0.5479
+    F1 macro: 0.6647
+    TP=118  FP=49  TN=40  FN=17
+
+HIGH-CONFIDENCE VALIDATION
+  24/25 correct (96%)
+
+================================================================================
+END OF REPORT
+================================================================================

@@ -79,8 +79,11 @@ def ensure_output_keys(cfg, config_path):
         print(f"  [config] Auto-added P9 output keys to {config_path}")
     return cfg
 
-def rp(cfg, key):
-    return Path(os.path.expanduser(cfg['project_dir'])) / cfg['outputs'][key]
+def rp(cfg, key, suffix=""):
+    p = Path(os.path.expanduser(cfg['project_dir'])) / cfg['outputs'][key]
+    if suffix:
+        return p.parent / (p.stem + suffix + p.suffix)
+    return p
 
 
 # =============================================================================
@@ -347,16 +350,28 @@ def main():
                         help='Override n_estimators from config')
     parser.add_argument('--skip-shap', action='store_true',
                         help='Skip SHAP computation (faster)')
+    parser.add_argument('--feature-matrix', default=None,
+                        help='Override feature matrix path (auto-detects output suffix)')
     args = parser.parse_args()
 
     cfg = load_config(args.config)
     cfg = ensure_output_keys(cfg, args.config)
     proj = Path(os.path.expanduser(cfg['project_dir']))
 
+    # Auto-detect output suffix from --feature-matrix filename
+    out_suffix = ""
+    if args.feature_matrix:
+        stem = Path(args.feature_matrix).stem
+        base = "08_zorc_feature_matrix"
+        if stem.startswith(base):
+            out_suffix = stem[len(base):]
+
     print("=" * 70)
     print("ZORC — Phase 9: Random Forest + SHAP")
     print(f"Config: {args.config}")
     print(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    if out_suffix:
+        print(f"Output suffix: {out_suffix}")
     print("=" * 70)
 
     seed         = cfg['ml']['random_seed']
@@ -364,7 +379,8 @@ def main():
     np.random.seed(seed)
 
     # --- Load feature matrix -------------------------------------------------
-    matrix_path = rp(cfg, 'feature_matrix')
+    matrix_path = (Path(args.feature_matrix) if args.feature_matrix
+                   else rp(cfg, 'feature_matrix'))
     print(f"\n[1/6] Loading feature matrix: {matrix_path}")
     df = pd.read_csv(matrix_path)
     print(f"  {len(df):,} samples, {len(df.columns)} columns")
@@ -417,7 +433,7 @@ def main():
     df_pred['prob_pos'] = rf.predict_proba(X_all)[:, 1]
     df_pred['pred_class'] = rf.predict(X_all)
     df_pred['correct'] = (df_pred['pred_class'] == df_pred['class']).astype(int)
-    pred_path = rp(cfg, 'rf_predictions')
+    pred_path = rp(cfg, 'rf_predictions', out_suffix)
     pred_path.parent.mkdir(parents=True, exist_ok=True)
     df_pred.to_csv(pred_path, index=False)
 
@@ -427,7 +443,7 @@ def main():
         print(f"\n[5/6] SHAP feature importance...")
         importance_df, shap_df = compute_shap(rf, X_train, feature_cols)
         if shap_df is not None:
-            shap_path = rp(cfg, 'shap_values')
+            shap_path = rp(cfg, 'shap_values', out_suffix)
             shap_path.parent.mkdir(parents=True, exist_ok=True)
             shap_df.to_csv(shap_path, index=False)
             importance_df.to_csv(
@@ -443,7 +459,7 @@ def main():
     hc_metrics = validate_high_confidence(rf, X_all, df, feature_cols, proj)
 
     # --- Save model ----------------------------------------------------------
-    model_path = rp(cfg, 'rf_model')
+    model_path = rp(cfg, 'rf_model', out_suffix)
     model_path.parent.mkdir(parents=True, exist_ok=True)
     with open(model_path, 'wb') as f:
         pickle.dump({
@@ -456,7 +472,7 @@ def main():
 
     # --- Write report --------------------------------------------------------
     _write_report(metrics, hc_metrics, importance_df, feature_cols,
-                  n_estimators, str(rp(cfg, 'rf_report')))
+                  n_estimators, str(rp(cfg, 'rf_report', out_suffix)))
 
     # --- Final summary -------------------------------------------------------
     print(f"\n{'='*70}")

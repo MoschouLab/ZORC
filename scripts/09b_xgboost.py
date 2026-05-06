@@ -53,6 +53,8 @@ warnings.filterwarnings("ignore", category=UserWarning)
 def parse_args():
     p = argparse.ArgumentParser(description="ZORC P9b — XGBoost benchmark")
     p.add_argument("--config", required=True, help="Path to zorc_config.yaml")
+    p.add_argument("--feature-matrix", default=None,
+                   help="Override feature matrix path (auto-detects output suffix)")
     return p.parse_args()
 
 
@@ -230,10 +232,20 @@ def main():
     cfg    = load_config(args.config)
     ts     = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    # Auto-detect output suffix from --feature-matrix filename
+    out_suffix = ""
+    if args.feature_matrix:
+        stem = Path(args.feature_matrix).stem
+        base = "08_zorc_feature_matrix"
+        if stem.startswith(base):
+            out_suffix = stem[len(base):]
+
     print("=" * 70)
     print("ZORC — Phase 9b: XGBoost Benchmark")
     print(f"Config: {args.config}")
     print(f"Timestamp: {ts}")
+    if out_suffix:
+        print(f"Output suffix: {out_suffix}")
     print("=" * 70)
 
     # ── Paths ──────────────────────────────────────────────────────────────
@@ -244,8 +256,9 @@ def main():
     results_dir.mkdir(parents=True, exist_ok=True)
     logs_dir.mkdir(parents=True, exist_ok=True)
 
-    feature_matrix_path = data_dir / cfg.get(
-        "feature_matrix_file", "08_zorc_feature_matrix.csv")
+    feature_matrix_path = (Path(args.feature_matrix) if args.feature_matrix
+                           else data_dir / cfg.get(
+                               "feature_matrix_file", "08_zorc_feature_matrix.csv"))
     split_path          = data_dir / cfg.get(
         "split_assignments_file", "08_zorc_split_assignments.csv")
     hc_path             = data_dir / cfg.get(
@@ -447,17 +460,17 @@ def main():
     print("\n  Saving outputs...")
 
     # Model
-    model_path = results_dir / "09b_zorc_xgb_model.json"
+    model_path = results_dir / f"09b_zorc_xgb_model{out_suffix}.json"
     booster.save_model(str(model_path))
     print(f"  Model saved: {model_path}")
 
     # SHAP values (train set)
-    shap_path = results_dir / "09b_zorc_xgb_shap_values.csv"
+    shap_path = results_dir / f"09b_zorc_xgb_shap_values{out_suffix}.csv"
     shap_df.to_csv(shap_path, index=False)
     print(f"  SHAP values saved: {shap_path}")
 
     # SHAP importance
-    imp_path = results_dir / "09b_zorc_xgb_shap_importance.csv"
+    imp_path = results_dir / f"09b_zorc_xgb_shap_importance{out_suffix}.csv"
     importance_df.to_csv(imp_path, index=False)
     print(f"  SHAP importance saved: {imp_path}")
 
@@ -472,12 +485,12 @@ def main():
         pred_all[np.where(mask)[0]] = probs
     pred_df["prob_pos"] = pred_all
     pred_df["pred"] = (pred_df["prob_pos"] >= 0.5).astype("Int64")
-    pred_path = results_dir / "09b_zorc_xgb_predictions.csv"
+    pred_path = results_dir / f"09b_zorc_xgb_predictions{out_suffix}.csv"
     pred_df.to_csv(pred_path, index=False)
     print(f"  Predictions saved: {pred_path}")
 
     # ── 10. Write report ───────────────────────────────────────────────────
-    report_path = logs_dir / "09b_xgb_report.txt"
+    report_path = logs_dir / f"09b_xgb_report{out_suffix}.txt"
     test_res = [r for r in results if r["split"] == "TEST"][0]
     val_res  = [r for r in results if r["split"] == "VAL"][0]
 

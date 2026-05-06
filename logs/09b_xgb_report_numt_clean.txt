@@ -1,0 +1,56 @@
+ZORC Phase 9b — XGBoost Report
+Timestamp: 2026-05-06 11:07:12
+
+XGBoost params:
+  objective: binary:logistic
+  eval_metric: ['logloss', 'auc']
+  max_depth: 6
+  learning_rate: 0.05
+  n_estimators: 500
+  min_child_weight: 5
+  subsample: 0.8
+  colsample_bytree: 0.8
+  scale_pos_weight: 0.6148648648648649
+  use_label_encoder: False
+  seed: 42
+  tree_method: hist
+  device: cuda
+
+Best round: 71
+
+Val  AUROC=0.7850  AUPRC=0.8256  F1-macro=0.7224
+Test AUROC=0.7639  AUPRC=0.8235  F1-macro=0.6872
+
+HC validation: 24/25 (96%)
+
+Top 30 SHAP features:
+   1  mrna_length                          0.1805
+   2  packing_density                      0.1781
+   3  di_CG                                0.1635
+   4  rrach_count                          0.1590
+   5  fU                                   0.1362
+   6  mfe                                  0.1342
+   7  di_UA                                0.1221
+   8  cds_length                           0.1149
+   9  di_UG                                0.0967
+  10  utr3_au_content                      0.0887
+  11  utr3_length                          0.0688
+  12  di_CU                                0.0655
+  13  n_stemloops_per_kb                   0.0654
+  14  rmsf_nterm50                         0.0651
+  15  fG                                   0.0646
+  16  di_AG                                0.0638
+  17  rmsf_cterm50                         0.0632
+  18  mean_disorder                        0.0598
+  19  contact_density                      0.0590
+  20  di_GC                                0.0588
+  21  di_UU                                0.0566
+  22  utr5_fraction                        0.0501
+  23  sasa_per_residue                     0.0500
+  24  di_GU                                0.0473
+  25  rg_mean                              0.0460
+  26  fC                                   0.0439
+  27  max_disorder_window                  0.0419
+  28  rmsf_std                             0.0406
+  29  utr5_length                          0.0397
+  30  di_CA                                0.0378
