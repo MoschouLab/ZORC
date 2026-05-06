@@ -288,23 +288,40 @@ El portfolio computacional ZORC está terminado. Todas las fases de software com
 | Generative AI / RAG | P14a | ChromaDB, LangChain 1.x, all-MiniLM-L6-v2, 1244 chunks |
 | LLM Agents | P14b | LangGraph 1.1.9 StateGraph, Anthropic SDK, conditional routing |
 
-### Métricas finales del modelo (P9f)
+### Métricas finales del modelo (P9f — NUMT-clean, manuscrito)
 ```
-RandomForestClassifier — 500 trees — Platt calibrated
-Test AUROC  : 0.7963
-Test AUPRC  : 0.8431
-Test F1-macro: 0.7229 (F1-pos=0.7904, F1-neg=0.6554)
+RandomForestClassifier — 500 trees — Platt calibrated — neg=1.5× class weight
+Test AUROC  : 0.7695   ← manuscript value (numt_clean dataset)
+Test AUPRC  : 0.8350   ← manuscript value
+Test F1-macro: 0.6732 (F1-pos=0.7826, F1-neg=0.5638)
 HC validation: 24/25 (96%) — lab-curated high-confidence P-body genes
-Dataset     : 1,510 genes × 63 features (41 RNA + 18 protein/IDR + 4 engineered)
+Dataset     : 1,434 genes × 61 features (41 RNA + 18 protein/IDR + 2 engineered)
+Model file  : results/09f_rf_final_model_numt_clean.pkl
 ```
+
+> **Nota (2026-05-06):** El modelo cargado en `api/` y la imagen Docker
+> `moschoulab/zorc-predictor:1.0` todavía usan el modelo original
+> (`09f_rf_final_model.pkl`, 1,510 genes, AUROC=0.7862).
+> **Pendiente actualizar con el modelo numt_clean.**
+
+Comparativa completa: `python scripts/09f_manuscript_metrics.py`
 
 ### Commits clave
 ```
+2537714  feat(model): rerun P9d+P9f on NUMT-clean dataset — final manuscript metrics
+7be1e1d  docs: update continuation prompt — NUMT fix done, P9d+P9f rerun pending
+830d87f  fix(data): remove NUMT contaminants from feature matrix
 37fb5e5  feat(P14b): LangGraph ZORC agent
 a4cd868  feat(P14a): ChromaDB + LangChain RAG
-60deb0d  feat(monitoring): EvidentlyAI + Prometheus
-64c85fa  chore: coverage artifacts gitignore
 ```
+
+### Pendiente (computacional)
+- **api/ + Docker** — actualizar modelo a `09f_rf_final_model_numt_clean.pkl`;
+  reetiquetear imagen Docker como `moschoulab/zorc-predictor:1.1`; rereunir tests
+- **README.md** — actualizar métricas a los valores honestos numt_clean
+  (AUROC=0.7695, AUPRC=0.8350) y añadir nota sobre corrección NUMT
+- **Dashboards Plotly Dash** — añadir gráficas interactivas que sustituyan
+  la integración Tableau (CSVs ya preparados en dashboard/)
 
 ### Pendiente (no computacional)
 - **P13** — spatial transcriptomics validation + facility submission (manual, before summer 2026)
@@ -368,4 +385,4 @@ a4cd868  feat(P14a): ChromaDB + LangChain RAG
 
 ---
 
-*Prompt updated: 2026-04-30 · **PORTFOLIO COMPLETO** · P1–P9f + P10 + P11a–d + P12a–f + P14a–b ✅ · Pendiente solo P13 (manual, spatial transcriptomics)*
+*Prompt updated: 2026-05-06 · **PORTFOLIO COMPLETO** · P1–P9f + P10 + P11a–d + P12a–f + P14a–b ✅ · Métricas manuscrito fijadas (AUROC=0.7695, numt_clean) · Pendiente: api/Docker numt_clean model, README métricas honestas, Dash dashboards, P13 (manual)*
