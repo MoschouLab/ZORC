@@ -1,0 +1,68 @@
+ZORC Phase 9f — Final Model Report
+Timestamp: 2026-05-06 12:49:25
+
+Features: 61 (dropped: ['packing_x_idr', 'rrach_per_cds_kb'])
+Best class weight: neg=1.5×
+Calibration: Platt sigmoid, cv=5
+
+Brier score uncal/cal: 0.1868 / 0.1847
+
+TEST uncalibrated:
+  split: TEST uncal
+  threshold: 0.5
+  auroc: 0.7740324594257177
+  auprc: 0.8377909299033934
+  f1_macro: 0.6832394334582839
+  f1_pos: 0.7892976588628763
+  f1_neg: 0.5771812080536913
+  tn: 43
+  fp: 46
+  fn: 17
+  tp: 118
+
+TEST calibrated:
+  split: TEST cal
+  threshold: 0.5
+  auroc: 0.7694548481065334
+  auprc: 0.8350430470738068
+  f1_macro: 0.6731835424569594
+  f1_pos: 0.782608695652174
+  f1_neg: 0.5637583892617449
+  tn: 42
+  fp: 47
+  fn: 18
+  tp: 117
+
+HC: uncal=24/25  cal=24/25
+
+Top 30 SHAP:
+   1  mrna_length                          0.0228
+   2  rrach_count                          0.0197
+   3  cds_length                           0.0186
+   4  mfe                                  0.0185
+   5  di_CG                                0.0162
+   6  di_UA                                0.0143
+   7  n_residues                           0.0115
+   8  fU                                   0.0104
+   9  utr3_au_content                      0.0104
+  10  utr3_length                          0.0102
+  11  di_UG                                0.0099
+  12  di_AG                                0.0097
+  13  utr5_length                          0.0090
+  14  fG                                   0.0085
+  15  rmsf_nterm50                         0.0084
+  16  utr3_au_x_length                     0.0080
+  17  rmsf_nterm_cterm_ratio               0.0079
+  18  di_CU                                0.0076
+  19  gc_content                           0.0076
+  20  au_content                           0.0074
+  21  packing_density                      0.0074
+  22  mfe_per_nt                           0.0074
+  23  rmsf_max                             0.0074
+  24  utr5_fraction                        0.0074
+  25  n_stemloops                          0.0072
+  26  di_UU                                0.0069
+  27  rmsf_std                             0.0067
+  28  rg_mean                              0.0061
+  29  cds_fraction                         0.0059
+  30  sasa_per_residue                     0.0056

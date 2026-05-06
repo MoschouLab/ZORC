@@ -1,0 +1,76 @@
+ZORC Phase 9d — Feature Engineering Report
+Timestamp: 2026-05-06 12:43:34
+
+Engineered features: ['rmsf_nterm_cterm_ratio', 'packing_x_idr', 'rrach_per_cds_kb', 'utr3_au_x_length']
+
+RF  Val  AUROC=0.7747  AUPRC=0.8268  F1=0.6889
+RF  Test AUROC=0.7685  AUPRC=0.8343  F1=0.6853
+XGB Val  AUROC=0.7677  AUPRC=0.8135  F1=0.7079
+XGB Test AUROC=0.7672  AUPRC=0.8244  F1=0.6899
+
+RF  HC: 24/25
+XGB HC: 22/25
+
+RF Top 30 SHAP:
+   1  mrna_length                          0.0219
+   2  mfe                                  0.0206
+   3  rrach_count                          0.0189
+   4  cds_length                           0.0188
+   5  di_CG                                0.0158
+   6  di_UA                                0.0128
+   7  di_UG                                0.0101
+   8  n_stemloops                          0.0101
+   9  n_residues                           0.0096
+  10  fU                                   0.0094
+  11  utr3_length                          0.0090
+  12  utr3_au_content                      0.0090
+  13  rmsf_nterm50                         0.0089
+  14  mfe_per_nt                           0.0084
+  15  fG                                   0.0082
+  16  rmsf_nterm_cterm_ratio               0.0082
+  17  utr5_length                          0.0081
+  18  di_CU                                0.0081
+  19  utr3_au_x_length                     0.0078
+  20  di_AG                                0.0078
+  21  packing_density                      0.0072
+  22  di_UU                                0.0072
+  23  rmsf_std                             0.0072
+  24  utr5_fraction                        0.0071
+  25  gc_content                           0.0069
+  26  rmsf_max                             0.0067
+  27  au_content                           0.0064
+  28  rg_mean                              0.0063
+  29  cds_fraction                         0.0062
+  30  sasa_per_residue                     0.0059
+
+XGB Top 30 SHAP:
+   1  rrach_count                          0.1634
+   2  mrna_length                          0.1573
+   3  di_CG                                0.1489
+   4  packing_density                      0.1061
+   5  mfe                                  0.0994
+   6  di_UA                                0.0980
+   7  cds_length                           0.0940
+   8  utr3_au_content                      0.0758
+   9  rmsf_nterm_cterm_ratio               0.0733
+  10  fG                                   0.0689
+  11  fU                                   0.0589
+  12  sasa_per_residue                     0.0569
+  13  rmsf_nterm50                         0.0475
+  14  di_GC                                0.0464
+  15  di_UG                                0.0456
+  16  n_stemloops_per_kb                   0.0449
+  17  di_CU                                0.0433
+  18  n_residues                           0.0422
+  19  di_AG                                0.0419
+  20  utr3_length                          0.0417
+  21  di_UU                                0.0367
+  22  utr5_length                          0.0349
+  23  utr5_fraction                        0.0335
+  24  contact_density                      0.0310
+  25  utr3_au_x_length                     0.0307
+  26  rmsf_mean                            0.0305
+  27  rg_mean                              0.0291
+  28  au_content                           0.0275
+  29  di_GU                                0.0269
+  30  rmsf_max                             0.0257

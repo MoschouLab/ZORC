@@ -61,6 +61,10 @@ warnings.filterwarnings("ignore")
 def parse_args():
     p = argparse.ArgumentParser(description="ZORC P9f — Final model")
     p.add_argument("--config", required=True)
+    p.add_argument("--feature-matrix", default=None,
+                   help="Override config feature matrix path")
+    p.add_argument("--output-suffix", default="",
+                   help="Suffix appended to all output filenames (e.g. _numt_clean)")
     return p.parse_args()
 
 
@@ -167,8 +171,15 @@ def main():
     results_dir = base_dir / "results"
     logs_dir    = base_dir / "logs"
 
-    fm_path  = base_dir / cfg.get("outputs", {}).get(
-                    "feature_matrix", "data/processed/08_zorc_feature_matrix.csv")
+    suffix = args.output_suffix
+
+    if args.feature_matrix:
+        fm_path = Path(args.feature_matrix)
+        if not fm_path.is_absolute():
+            fm_path = base_dir / fm_path
+    else:
+        fm_path = base_dir / cfg.get("outputs", {}).get(
+                        "feature_matrix", "data/processed/08_zorc_feature_matrix.csv")
     hc_path  = base_dir / cfg.get("outputs", {}).get(
                     "hc_set", "data/processed/colleague_high_confidence_set.csv")
 
@@ -342,11 +353,11 @@ def main():
               f"{row['mean_abs_shap']:>12.4f}{eng}")
 
     # ── Save outputs ──────────────────────────────────────────────────────
-    with open(results_dir / "09f_rf_final_model.pkl", "wb") as f:
+    with open(results_dir / f"09f_rf_final_model{suffix}.pkl", "wb") as f:
         pickle.dump(rf_cal, f)
-    with open(results_dir / "09f_rf_base_model.pkl", "wb") as f:
+    with open(results_dir / f"09f_rf_base_model{suffix}.pkl", "wb") as f:
         pickle.dump(rf_base, f)
-    imp.to_csv(results_dir / "09f_shap_final.csv", index=False)
+    imp.to_csv(results_dir / f"09f_shap_final{suffix}.csv", index=False)
 
     # Predictions all splits
     pred_df = df[["gene_id", "transcript_id", "class", "split"]].copy()
@@ -355,10 +366,10 @@ def main():
         prob_all[np.where(mask)[0]] = rf_cal.predict_proba(X_imp)[:, 1]
     pred_df["prob_pos"]  = prob_all
     pred_df["pred"]      = (pred_df["prob_pos"] >= 0.5).astype("Int64")
-    pred_df.to_csv(results_dir / "09f_predictions_final.csv", index=False)
+    pred_df.to_csv(results_dir / f"09f_predictions_final{suffix}.csv", index=False)
 
     # ── Report ──────────────────────────────────────────────────────────────
-    report_path = logs_dir / "09f_final_model_report.txt"
+    report_path = logs_dir / f"09f_final_model_report{suffix}.txt"
     with open(report_path, "w") as f:
         f.write(f"ZORC Phase 9f — Final Model Report\n")
         f.write(f"Timestamp: {ts}\n\n")

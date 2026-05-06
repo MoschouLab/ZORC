@@ -74,6 +74,10 @@ warnings.filterwarnings("ignore", category=UserWarning)
 def parse_args():
     p = argparse.ArgumentParser(description="ZORC P9d — Feature Engineering")
     p.add_argument("--config", required=True)
+    p.add_argument("--feature-matrix", default=None,
+                   help="Override config feature matrix path")
+    p.add_argument("--output-suffix", default="",
+                   help="Suffix appended to all output filenames (e.g. _numt_clean)")
     return p.parse_args()
 
 
@@ -270,8 +274,15 @@ def main():
     logs_dir    = base_dir / "logs"
     results_dir.mkdir(parents=True, exist_ok=True)
 
-    fm_path  = base_dir / cfg.get("outputs", {}).get(
-                    "feature_matrix", "data/processed/08_zorc_feature_matrix.csv")
+    suffix = args.output_suffix
+
+    if args.feature_matrix:
+        fm_path = Path(args.feature_matrix)
+        if not fm_path.is_absolute():
+            fm_path = base_dir / fm_path
+    else:
+        fm_path = base_dir / cfg.get("outputs", {}).get(
+                        "feature_matrix", "data/processed/08_zorc_feature_matrix.csv")
     hc_path  = base_dir / cfg.get("outputs", {}).get(
                     "hc_set", "data/processed/colleague_high_confidence_set.csv")
 
@@ -304,7 +315,7 @@ def main():
         print(f"  {feat:<30} {pos_m:>10.4f} {neg_m:>10.4f} {ratio:>7.3f}×")
 
     # Save enriched feature matrix
-    eng_fm_path = data_dir / "08_zorc_feature_matrix_eng.csv"
+    eng_fm_path = data_dir / f"08_zorc_feature_matrix_eng{suffix}.csv"
     df_save = df.rename(columns={"gene_id": "geneID"})
     df_save.to_csv(eng_fm_path, index=False)
     print(f"\n  Enriched matrix saved: {eng_fm_path.name}")
@@ -450,18 +461,18 @@ def main():
     pred_df["prob_pos"] = prob_all
     pred_df["pred"]     = (prob_all >= 0.5).astype(int)
     pred_df["correct"]  = (pred_df["pred"] == pred_df["class"]).astype(int)
-    pred_path = results_dir / "09d_zorc_predictions.csv"
+    pred_path = results_dir / f"09d_zorc_predictions{suffix}.csv"
     pred_df.to_csv(pred_path, index=False)
     print(f"\n  Predictions saved: {pred_path.name} ({len(pred_df):,} genes)")
 
     # ── Save outputs ──────────────────────────────────────────────────────────
-    imp_rf.to_csv(results_dir / "09d_shap_rf_eng.csv", index=False)
-    imp_xgb.to_csv(results_dir / "09d_shap_xgb_eng.csv", index=False)
+    imp_rf.to_csv(results_dir / f"09d_shap_rf_eng{suffix}.csv", index=False)
+    imp_xgb.to_csv(results_dir / f"09d_shap_xgb_eng{suffix}.csv", index=False)
 
-    with open(results_dir / "09d_rf_eng_model.pkl", "wb") as f:
+    with open(results_dir / f"09d_rf_eng_model{suffix}.pkl", "wb") as f:
         pickle.dump(rf, f)
 
-    booster.save_model(str(results_dir / "09d_xgb_eng_model.json"))
+    booster.save_model(str(results_dir / f"09d_xgb_eng_model{suffix}.json"))
 
     # ── Report ────────────────────────────────────────────────────────────────
     rf_val  = [r for r in rf_results  if r["split"] == "VAL"][0]
@@ -469,7 +480,7 @@ def main():
     xb_val  = [r for r in xgb_results if r["split"] == "VAL"][0]
     xb_test = [r for r in xgb_results if r["split"] == "TEST"][0]
 
-    report_path = logs_dir / "09d_feature_engineering_report.txt"
+    report_path = logs_dir / f"09d_feature_engineering_report{suffix}.txt"
     with open(report_path, "w") as f:
         f.write(f"ZORC Phase 9d — Feature Engineering Report\n")
         f.write(f"Timestamp: {ts}\n\n")
