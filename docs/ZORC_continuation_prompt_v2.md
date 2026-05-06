@@ -123,6 +123,47 @@ for dynamic features, diluting their SHAP contributions by ~50%.
 
 ---
 
+## NUMT fix — commit 830d87f (2026-05-06)
+
+**68 NUMT contaminants removed from negative class** (AT2G07xxx pericentromeric
+pseudogenes/TE-derived loci). 8 ambiguous loci moved to held-out set.
+
+| | Genes | pos | neg |
+|---|---|---|---|
+| Original | 1,510 | 889 | 621 |
+| Clean (`numt_clean`) | 1,434 | 888 | 546 |
+
+Metric impact (test set, rerun on `08_zorc_feature_matrix_numt_clean.csv`):
+
+| Model | AUROC | AUPRC | F1-macro | HC |
+|---|---|---|---|---|
+| RF original | 0.7878 | 0.8327 | 0.6942 | 24/25 |
+| RF numt_clean | 0.7740 | **0.8447** | 0.6647 | 24/25 |
+| XGB original | 0.7879 | 0.8317 | 0.6976 | 23/25 |
+| XGB numt_clean | 0.7639 | 0.8235 | 0.6872 | **24/25** |
+
+AUROC drop expected (NUMT sequences were "easy" negatives with organellar
+nucleotide composition). AUPRC RF improves +0.012 — more honest estimate.
+HC validation maintained 24/25 (RF) and improved 23→24/25 (XGB).
+
+**⚠ PENDING — P9d + P9f rerun on numt_clean dataset:**
+`data/processed/08_zorc_feature_matrix_numt_clean.csv` is the correct input
+for all final model comparisons and the manuscript. P9d (feature engineering)
+and P9f (Platt-calibrated final RF) need to be rerun with this clean matrix
+to produce publication-ready metrics. Commit 830d87f contains only the P9
+baseline and P9b (XGBoost) reruns.
+
+Files produced (commit 830d87f):
+- `scripts/08b_numt_filter.py` — filter script
+- `scripts/09e_numt_impact.py` — metric comparison table
+- `data/processed/08_zorc_feature_matrix_numt_clean.csv`
+- `data/processed/08_zorc_numt_excluded.csv` (audit trail)
+- `data/processed/08_zorc_numt_heldout.csv` (8 ambiguous for review)
+- `results/09_zorc_rf_model_numt_clean.pkl`
+- `results/09b_zorc_xgb_model_numt_clean.json`
+
+---
+
 ## P12e — CI/CD summary (completed 2026-04-24)
 
 - **47 tests** across `tests/test_pipeline.py` (31) and `tests/test_api.py` (16)
