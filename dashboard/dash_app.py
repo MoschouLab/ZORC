@@ -71,6 +71,11 @@ SHAP_FILES = {
     "P9f": RESULTS / "09f_shap_final.csv",
 }
 
+# Pages 4-6 data sources
+SHAP_NUMT_PATH = RESULTS / "09f_shap_final_numt_clean.csv"
+LANDSCAPE_PATH = ROOT / "tableau" / "02_probability_landscape.csv"
+PIPE_HIST_PATH = ROOT / "tableau" / "03_pipeline_history.csv"
+
 META_COLS = {
     "geneID", "gene_id", "transcript_id", "class", "condition", "qc_fail",
     "isoform_source", "event_type", "bioemu_tier", "bioemu_status",
@@ -233,6 +238,42 @@ UMAP_DF = UMAP_DF.join(
     ALL_PREDS["P9f"].set_index("gene_id")[["prob_pos", "pred"]], on="gene_id"
 )
 UMAP_DF["pred_error"] = (UMAP_DF["pred"] != UMAP_DF["class"]).astype(int)
+
+print("All data loaded. Loading pages 4-6 data…")
+
+# ── Pages 4-6: data loading ───────────────────────────────────────────────────
+
+_SHAP_NUMT = pd.read_csv(SHAP_NUMT_PATH)
+_SHAP_NUMT["category"] = _SHAP_NUMT["feature"].apply(feature_category)
+
+_LANDSCAPE = pd.read_csv(LANDSCAPE_PATH)
+
+_PIPE_ORIG = pd.read_csv(PIPE_HIST_PATH)
+_PIPE_ORIG = _PIPE_ORIG[
+    (_PIPE_ORIG["split"] == "test") &
+    (_PIPE_ORIG["run_label"].isin([
+        "RF Baseline", "XGBoost (post-AF2)", "RF + Feature Eng.", "RF Final (Platt cal.)"
+    ]))
+].copy()
+_PIPE_ORIG["dataset"] = "Original (1,510)"
+
+_PIPE_NUMT = pd.DataFrame([
+    {"phase": "P9",  "run_label": "RF Baseline",         "phase_order": 1,
+     "auroc": 0.7740, "auprc": 0.8447, "f1_macro": 0.6647,
+     "dataset": "NUMT-clean (1,434)"},
+    {"phase": "P9b", "run_label": "XGBoost (post-AF2)",   "phase_order": 2,
+     "auroc": 0.7639, "auprc": 0.8235, "f1_macro": 0.6872,
+     "dataset": "NUMT-clean (1,434)"},
+    {"phase": "P9d", "run_label": "RF + Feature Eng.",    "phase_order": 3,
+     "auroc": 0.7685, "auprc": 0.8343, "f1_macro": 0.6853,
+     "dataset": "NUMT-clean (1,434)"},
+    {"phase": "P9f", "run_label": "RF Final (Platt cal.)","phase_order": 4,
+     "auroc": 0.7695, "auprc": 0.8350, "f1_macro": 0.6732,
+     "dataset": "NUMT-clean (1,434)"},
+])
+_PIPE_ALL = pd.concat([_PIPE_ORIG, _PIPE_NUMT], ignore_index=True).sort_values(
+    ["dataset", "phase_order"]
+)
 
 print("All data loaded. Starting app…")
 
@@ -407,7 +448,156 @@ panel_experiments = dbc.Card(dbc.CardBody([
     ),
 ]), style=_CARD)
 
+# ── Page 4: Feature Importance (numt_clean) ──────────────────────────────────
+
+panel_shap_numt = dbc.Card(dbc.CardBody([
+    html.H5("Feature Importance — Final Model (NUMT-clean)", className="card-title"),
+    html.P(
+        "Mean |SHAP| from 09f_rf_final_model_numt_clean.pkl (P9f, n=1,434 genes). "
+        "These are the manuscript-reported feature importances.",
+        className="text-muted small",
+    ),
+    dbc.Row([
+        dbc.Col([
+            dbc.Label("Feature category"),
+            dcc.Dropdown(
+                id="shap4-category",
+                options=[{"label": c, "value": c} for c in CATEGORY_MAP],
+                value="All",
+                clearable=False,
+            ),
+        ], md=4),
+        dbc.Col([
+            dbc.Label("Show top N features"),
+            dcc.Slider(
+                id="shap4-topn",
+                min=5, max=30, step=5, value=20,
+                marks={n: str(n) for n in [5, 10, 15, 20, 25, 30]},
+            ),
+        ], md=8),
+    ], className="mb-3"),
+    dcc.Graph(id="shap4-bar", style={"height": "600px"}),
+]), style=_CARD)
+
+# ── Page 5: Probability Landscape ────────────────────────────────────────────
+
+panel_landscape = dbc.Card(dbc.CardBody([
+    html.H5("P-body Probability Landscape", className="card-title"),
+    html.P(
+        "Scatter of 3′ UTR AU content vs RRACH count. Color encodes P(P-body enriched); "
+        "shape (●=enriched, ×=not enriched) encodes the true class label.",
+        className="text-muted small",
+    ),
+    dbc.Row([
+        dbc.Col([
+            dbc.Label("Color encoding"),
+            dcc.RadioItems(
+                id="landscape-color",
+                options=[
+                    {"label": "  P(P-body enriched)", "value": "prob_pos"},
+                    {"label": "  True class label",   "value": "class"},
+                ],
+                value="prob_pos",
+                inline=True,
+                inputStyle={"marginRight": "4px"},
+                labelStyle={"marginRight": "18px"},
+            ),
+        ], md=6),
+        dbc.Col([
+            dbc.Label("Dataset split"),
+            dcc.Dropdown(
+                id="landscape-split",
+                options=[
+                    {"label": "All genes",  "value": "all"},
+                    {"label": "Test only",  "value": "test"},
+                    {"label": "Val only",   "value": "val"},
+                ],
+                value="all",
+                clearable=False,
+            ),
+        ], md=3),
+    ], className="mb-3"),
+    dcc.Graph(id="landscape-scatter", style={"height": "520px"}),
+]), style=_CARD)
+
+# ── Page 6: Pipeline Optimization History ────────────────────────────────────
+
+def _build_pipeline_history_fig() -> go.Figure:
+    _METRIC_COLORS = {"auroc": "#2E86AB", "auprc": "#FB8500", "f1_macro": "#8338EC"}
+    _METRIC_LABELS = {"auroc": "AUROC", "auprc": "AUPRC", "f1_macro": "F1-macro"}
+    _DSET_DASH   = {"Original (1,510)": "solid",  "NUMT-clean (1,434)": "dash"}
+    _DSET_SYMBOL = {"Original (1,510)": "circle", "NUMT-clean (1,434)": "diamond"}
+    _X_LABELS = [
+        "P9\nRF Baseline", "P9b\nXGBoost", "P9d\nRF+Feat.Eng.", "P9f\nRF Final"
+    ]
+    fig = go.Figure()
+    for dataset, grp in _PIPE_ALL.groupby("dataset"):
+        grp = grp.sort_values("phase_order")
+        x_vals = _X_LABELS[:len(grp)]
+        for metric, color in _METRIC_COLORS.items():
+            y_vals = grp[metric].tolist()
+            fig.add_trace(go.Scatter(
+                x=x_vals,
+                y=y_vals,
+                mode="lines+markers",
+                name=f"{_METRIC_LABELS[metric]} — {dataset}",
+                line=dict(color=color, dash=_DSET_DASH[dataset], width=2.5),
+                marker=dict(
+                    symbol=_DSET_SYMBOL[dataset], size=9,
+                    color=color, line=dict(color="white", width=1),
+                ),
+                hovertemplate=(
+                    f"<b>{_METRIC_LABELS[metric]}</b><br>"
+                    "Phase: %{x}<br>Value: %{y:.4f}<br>"
+                    f"Dataset: {dataset}<extra></extra>"
+                ),
+            ))
+    fig.add_annotation(
+        x="P9f\nRF Final", y=0.7695, text="0.7695 ← manuscript",
+        showarrow=True, arrowhead=2, arrowcolor="#2E86AB",
+        font=dict(size=10, color="#2E86AB"), ax=65, ay=-30,
+    )
+    fig.update_layout(
+        title=dict(
+            text="Pipeline Optimization History — AUROC / AUPRC / F1-macro (test set)",
+            font=dict(size=13),
+        ),
+        xaxis=dict(title="Pipeline phase", showgrid=True, gridcolor=PALETTE["grid"]),
+        yaxis=dict(
+            title="Metric value", showgrid=True, gridcolor=PALETTE["grid"],
+            range=[0.55, 0.90],
+        ),
+        legend=dict(
+            font=dict(size=9), x=1.01, y=1.0,
+            xanchor="left", yanchor="top",
+            bordercolor="#DDD", borderwidth=1,
+        ),
+        plot_bgcolor=PALETTE["bg"], paper_bgcolor=PALETTE["bg"],
+        margin=dict(t=50, b=60, l=60, r=260),
+    )
+    return fig
+
+
+_PIPELINE_FIG = _build_pipeline_history_fig()
+
+panel_pipeline_history = dbc.Card(dbc.CardBody([
+    html.H5("Pipeline Optimization History", className="card-title"),
+    html.P(
+        "AUROC / AUPRC / F1-macro on the test set across all model iterations. "
+        "Solid lines = original dataset (1,510 genes); "
+        "dashed lines = NUMT-clean (1,434 genes, manuscript values). "
+        "AUROC drop at NUMT-clean is expected: removing trivially-easy organellar "
+        "negatives gives a more honest discrimination estimate.",
+        className="text-muted small",
+    ),
+    dcc.Graph(figure=_PIPELINE_FIG, style={"height": "520px"}),
+]), style=_CARD)
+
 # ── Main layout ───────────────────────────────────────────────────────────────
+
+_TAB_STYLE       = {"padding": "6px 14px", "fontWeight": "500"}
+_TAB_STYLE_SEL   = {"padding": "6px 14px", "fontWeight": "700",
+                    "borderTop": f"3px solid {PALETTE['pos']}"}
 
 app.layout = dbc.Container([
     STORES,
@@ -418,14 +608,50 @@ app.layout = dbc.Container([
             className="text-muted mb-0",
         ),
     ]), className="py-3")),
-    dbc.Row([
-        dbc.Col(panel_umap, md=6, className="mb-3"),
-        dbc.Col(panel_perf, md=6, className="mb-3"),
-    ]),
-    dbc.Row([
-        dbc.Col(panel_shap,        md=8, className="mb-3"),
-        dbc.Col(panel_experiments, md=4, className="mb-3"),
-    ]),
+    dcc.Tabs(
+        id="main-tabs",
+        value="tab-explorer",
+        children=[
+            dcc.Tab(
+                label="ML Explorer (Panels 1–4)",
+                value="tab-explorer",
+                style=_TAB_STYLE,
+                selected_style=_TAB_STYLE_SEL,
+                children=[
+                    dbc.Row([
+                        dbc.Col(panel_umap, md=6, className="mb-3"),
+                        dbc.Col(panel_perf, md=6, className="mb-3"),
+                    ], className="mt-3"),
+                    dbc.Row([
+                        dbc.Col(panel_shap,        md=8, className="mb-3"),
+                        dbc.Col(panel_experiments, md=4, className="mb-3"),
+                    ]),
+                ],
+            ),
+            dcc.Tab(
+                label="Feature Importance (numt_clean)",
+                value="tab-shap4",
+                style=_TAB_STYLE,
+                selected_style=_TAB_STYLE_SEL,
+                children=[dbc.Row(dbc.Col(panel_shap_numt, className="mb-3"), className="mt-3")],
+            ),
+            dcc.Tab(
+                label="Probability Landscape",
+                value="tab-landscape",
+                style=_TAB_STYLE,
+                selected_style=_TAB_STYLE_SEL,
+                children=[dbc.Row(dbc.Col(panel_landscape, className="mb-3"), className="mt-3")],
+            ),
+            dcc.Tab(
+                label="Pipeline History",
+                value="tab-history",
+                style=_TAB_STYLE,
+                selected_style=_TAB_STYLE_SEL,
+                children=[dbc.Row(dbc.Col(panel_pipeline_history, className="mb-3"), className="mt-3")],
+            ),
+        ],
+        style={"marginBottom": "4px"},
+    ),
 ], fluid=True, className="px-4")
 
 
@@ -780,6 +1006,134 @@ def update_feat_scatter(feature: str | None, run: str, selected_gene: str | None
         plot_bgcolor=PALETTE["bg"], paper_bgcolor=PALETTE["bg"],
         margin=dict(t=35, b=40, l=50, r=10),
         legend=dict(font=dict(size=10)),
+    )
+    return fig
+
+
+# ── Page 4: SHAP bar (numt_clean) ────────────────────────────────────────────
+
+@callback(
+    Output("shap4-bar", "figure"),
+    Input("shap4-category", "value"),
+    Input("shap4-topn",     "value"),
+)
+def update_shap4(category: str, top_n: int) -> go.Figure:
+    df = _SHAP_NUMT.copy()
+    allowed = set(CATEGORY_MAP.get(category, []))
+    if allowed:
+        df = df[df["feature"].isin(allowed)]
+    df = df.sort_values("mean_abs_shap", ascending=False).head(top_n)
+    fig = go.Figure(go.Bar(
+        x=df["mean_abs_shap"][::-1],
+        y=df["feature"][::-1],
+        orientation="h",
+        marker_color=df["category"].map({
+            "RNA":             PALETTE["pos"],
+            "Protein-static":  "#FB8500",
+            "Protein-dynamic": "#8338EC",
+            "Engineered":      "#06D6A0",
+        }).fillna(PALETTE["pos"])[::-1],
+        text=[f"{v:.4f}" for v in df["mean_abs_shap"][::-1]],
+        textposition="outside",
+        hovertemplate="<b>%{y}</b><br>Mean |SHAP| = %{x:.4f}<extra></extra>",
+    ))
+    for cat, color in [
+        ("RNA", PALETTE["pos"]), ("Protein-static", "#FB8500"),
+        ("Protein-dynamic", "#8338EC"), ("Engineered", "#06D6A0"),
+    ]:
+        fig.add_trace(go.Scatter(
+            x=[None], y=[None], mode="markers",
+            marker=dict(color=color, size=10, symbol="square"),
+            name=cat, showlegend=True,
+        ))
+    fig.update_layout(
+        title=dict(
+            text=f"SHAP importance — P9f numt_clean | {category} | top {top_n}",
+            font=dict(size=12),
+        ),
+        xaxis_title="Mean |SHAP|",
+        margin=dict(t=35, b=30, l=10, r=80),
+        legend=dict(font=dict(size=10), x=0.60, y=0.05),
+        plot_bgcolor=PALETTE["bg"], paper_bgcolor=PALETTE["bg"],
+    )
+    return fig
+
+
+# ── Page 5: Probability Landscape ────────────────────────────────────────────
+
+@callback(
+    Output("landscape-scatter", "figure"),
+    Input("landscape-color", "value"),
+    Input("landscape-split", "value"),
+)
+def update_landscape(color_by: str, split_filter: str) -> go.Figure:
+    df = _LANDSCAPE.copy()
+    if split_filter != "all":
+        df = df[df["split"] == split_filter]
+    fig = go.Figure()
+
+    if color_by == "prob_pos":
+        for cls, sym, name in [
+            (1, "circle", "P-body enriched (●)"),
+            (0, "x",      "Not enriched (×)"),
+        ]:
+            sub = df[df["class"] == cls]
+            fig.add_trace(go.Scattergl(
+                x=sub["utr3_au_content"],
+                y=sub["rrach_count"],
+                mode="markers",
+                name=name,
+                marker=dict(
+                    symbol=sym,
+                    color=sub["prob_pos"],
+                    colorscale="RdYlGn",
+                    cmin=0, cmax=1,
+                    size=6 if cls == 1 else 5,
+                    opacity=0.75,
+                    colorbar=dict(title="P(pos)", thickness=14, x=1.02)
+                    if cls == 1 else None,
+                    showscale=cls == 1,
+                ),
+                customdata=sub[["gene_id", "prob_pos"]],
+                hovertemplate=(
+                    "<b>%{customdata[0]}</b><br>"
+                    "utr3_au_content: %{x:.3f}<br>"
+                    "rrach_count: %{y}<br>"
+                    "P(pos): %{customdata[1]:.3f}<extra></extra>"
+                ),
+            ))
+    else:
+        for cls, color, sym, name in [
+            (1, PALETTE["pos"], "circle", "P-body enriched (●)"),
+            (0, PALETTE["neg"], "x",      "Not enriched (×)"),
+        ]:
+            sub = df[df["class"] == cls]
+            fig.add_trace(go.Scattergl(
+                x=sub["utr3_au_content"],
+                y=sub["rrach_count"],
+                mode="markers",
+                name=name,
+                marker=dict(symbol=sym, color=color, size=6, opacity=0.65),
+                customdata=sub[["gene_id", "prob_pos"]],
+                hovertemplate=(
+                    "<b>%{customdata[0]}</b><br>"
+                    "utr3_au_content: %{x:.3f}<br>"
+                    "rrach_count: %{y}<br>"
+                    "P(pos): %{customdata[1]:.3f}<extra></extra>"
+                ),
+            ))
+
+    split_label = "all genes" if split_filter == "all" else f"{split_filter} set"
+    fig.update_layout(
+        title=dict(
+            text=f"P-body Probability Landscape — NUMT-clean ({split_label})",
+            font=dict(size=12),
+        ),
+        xaxis=dict(title="3′ UTR AU content", showgrid=True, gridcolor=PALETTE["grid"]),
+        yaxis=dict(title="RRACH count (m6A motifs)", showgrid=True, gridcolor=PALETTE["grid"]),
+        plot_bgcolor=PALETTE["bg"], paper_bgcolor=PALETTE["bg"],
+        margin=dict(t=40, b=50, l=60, r=30),
+        legend=dict(font=dict(size=11), x=0.01, y=0.99, xanchor="left", yanchor="top"),
     )
     return fig
 
