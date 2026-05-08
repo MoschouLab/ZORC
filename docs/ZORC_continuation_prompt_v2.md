@@ -299,29 +299,9 @@ Dataset     : 1,434 genes × 61 features (41 RNA + 18 protein/IDR + 2 engineered
 Model file  : results/09f_rf_final_model_numt_clean.pkl
 ```
 
-> **Nota (2026-05-06):** El modelo cargado en `api/` y la imagen Docker
-> `moschoulab/zorc-predictor:1.0` todavía usan el modelo original
-> (`09f_rf_final_model.pkl`, 1,510 genes, AUROC=0.7862).
-> **Pendiente actualizar con el modelo numt_clean.**
-
 Comparativa completa: `python scripts/09f_manuscript_metrics.py`
 
-### Commits clave
-```
-2537714  feat(model): rerun P9d+P9f on NUMT-clean dataset — final manuscript metrics
-7be1e1d  docs: update continuation prompt — NUMT fix done, P9d+P9f rerun pending
-830d87f  fix(data): remove NUMT contaminants from feature matrix
-37fb5e5  feat(P14b): LangGraph ZORC agent
-a4cd868  feat(P14a): ChromaDB + LangChain RAG
-```
-
-### Pendiente (computacional)
-- **Publicar README en GitHub** — el README.md con métricas honestas está listo.
-  Próximo paso: publicar el repositorio en MoschouLab/ZORC en GitHub (git remote
-  add origin + git push). El README público es el siguiente hito de visibilidad.
-  Ver sección FAIR publication checklist en ZORC_P10_P14_architecture.md.
-
-### Completado (2026-05-06)
+### Completado (2026-05-06) ✅
 - **api/ + Docker v1.1** ✅ — `api/main.py` carga `09f_rf_final_model_numt_clean.pkl`
   (61 features, CalibratedClassifierCV); `imputation_medians.json` regenerado;
   `docker/Dockerfile` → `moschoulab/zorc-predictor:1.1`; `/health` ✓ `/lookup/AT5G47010` ✓
@@ -331,12 +311,48 @@ a4cd868  feat(P14a): ChromaDB + LangChain RAG
   Page 4 (Feature Importance SHAP numt_clean), Page 5 (Probability Landscape),
   Page 6 (Pipeline History original vs numt_clean). Layout refactorizado en dcc.Tabs.
 
-### Commits (2026-05-06)
+### Commits clave (2026-05-06)
 ```
+8ef8513  docs: update continuation prompt — all three tasks completed
 aa96333  feat(dashboard): add Pages 4-6 to Dash app (numt_clean analytics)
 3ec7f75  docs(README): update model metrics to NUMT-clean honest values
 360233c  feat(api): upgrade to NUMT-clean P9f model — v1.1
+2537714  feat(model): rerun P9d+P9f on NUMT-clean dataset — final manuscript metrics
+830d87f  fix(data): remove NUMT contaminants from feature matrix
 ```
+
+### Tarea actual — Publicar MoschouLab/ZORC en GitHub público
+
+**Estado:** repo local completo y limpio. Siguiente acción:
+
+```bash
+# 1. Crear repositorio en GitHub (web UI o gh cli)
+gh repo create MoschouLab/ZORC --public --description \
+  "ZORC: Zip-code Of RNAs that Condense — ML pipeline for P-body mRNA enrichment in Arabidopsis thaliana"
+
+# 2. Conectar remote y hacer push
+git remote add origin https://github.com/MoschouLab/ZORC.git
+git push -u origin main
+
+# 3. Verificar GitHub Actions CI
+# .github/workflows/ci.yml ya está en el repo (47 tests, 86% cov)
+# Esperar que pasen lint + test + docker-build jobs
+# Badge CI ya está en README.md
+
+# 4. Crear release → Zenodo DOI (opcional, antes de manuscript submission)
+gh release create v1.0.0 --title "ZORC v1.0.0" \
+  --notes "Initial public release. NUMT-clean dataset. AUROC=0.7695."
+```
+
+**Checklist FAIR antes del push:**
+- [x] Snakefile con 15 reglas y conda directives
+- [x] README.md con métricas honestas (AUROC=0.7695) + badge CI
+- [x] config/zorc_config.yaml como único entry point de parámetros
+- [x] envs/zorc_pipeline.yml + envs/bioemu_ref.yml
+- [ ] `.gitignore` revisado — confirmar que `data/raw/` y `data/processed/bioemu/` no se suben
+- [ ] `data/raw/` — comprobar que NO contiene datos de terceros redistribuibles
+- [ ] Push y verificar Actions CI (lint + test + docker-build)
+- [ ] Zenodo DOI (crear release v1.0.0)
 
 ### Pendiente (no computacional)
 - **P13** — spatial transcriptomics validation + facility submission (manual, before summer 2026)
@@ -400,4 +416,4 @@ aa96333  feat(dashboard): add Pages 4-6 to Dash app (numt_clean analytics)
 
 ---
 
-*Prompt updated: 2026-05-06 · **PORTFOLIO COMPLETO + NUMT-CLEAN DEPLOYED** · P1–P9f + P10 + P11a–d + P12a–f + P14a–b ✅ · Métricas manuscrito fijadas (AUROC=0.7695, numt_clean) · api v1.1 + Docker 1.1 + README honestos + Dash Pages 4-6 ✅ · Siguiente: publicar MoschouLab/ZORC en GitHub + P13 (manual)*
+*Prompt updated: 2026-05-06 · **PORTFOLIO COMPLETO + NUMT-CLEAN DEPLOYED** · P1–P9f + P10 + P11a–d + P12a–f + P14a–b ✅ · api v1.1 + Docker 1.1 + README honestos + Dash Pages 4-6 ✅ · **Tarea actual: publicar MoschouLab/ZORC en GitHub público + verificar CI** · P13 spatial transcriptomics pendiente (manual)*
