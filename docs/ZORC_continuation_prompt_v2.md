@@ -316,12 +316,27 @@ a4cd868  feat(P14a): ChromaDB + LangChain RAG
 ```
 
 ### Pendiente (computacional)
-- **api/ + Docker** — actualizar modelo a `09f_rf_final_model_numt_clean.pkl`;
-  reetiquetear imagen Docker como `moschoulab/zorc-predictor:1.1`; rereunir tests
-- **README.md** — actualizar métricas a los valores honestos numt_clean
-  (AUROC=0.7695, AUPRC=0.8350) y añadir nota sobre corrección NUMT
-- **Dashboards Plotly Dash** — añadir gráficas interactivas que sustituyan
-  la integración Tableau (CSVs ya preparados en dashboard/)
+- **Publicar README en GitHub** — el README.md con métricas honestas está listo.
+  Próximo paso: publicar el repositorio en MoschouLab/ZORC en GitHub (git remote
+  add origin + git push). El README público es el siguiente hito de visibilidad.
+  Ver sección FAIR publication checklist en ZORC_P10_P14_architecture.md.
+
+### Completado (2026-05-06)
+- **api/ + Docker v1.1** ✅ — `api/main.py` carga `09f_rf_final_model_numt_clean.pkl`
+  (61 features, CalibratedClassifierCV); `imputation_medians.json` regenerado;
+  `docker/Dockerfile` → `moschoulab/zorc-predictor:1.1`; `/health` ✓ `/lookup/AT5G47010` ✓
+- **README.md** ✅ — métricas actualizadas a AUROC=0.7695, AUPRC=0.8350, F1=0.6732;
+  nota NUMT añadida en tabla de métricas; Docker tag 1.1
+- **Dashboards Plotly Dash** ✅ — Pages 4-6 añadidas al `dashboard/dash_app.py`:
+  Page 4 (Feature Importance SHAP numt_clean), Page 5 (Probability Landscape),
+  Page 6 (Pipeline History original vs numt_clean). Layout refactorizado en dcc.Tabs.
+
+### Commits (2026-05-06)
+```
+aa96333  feat(dashboard): add Pages 4-6 to Dash app (numt_clean analytics)
+3ec7f75  docs(README): update model metrics to NUMT-clean honest values
+360233c  feat(api): upgrade to NUMT-clean P9f model — v1.1
+```
 
 ### Pendiente (no computacional)
 - **P13** — spatial transcriptomics validation + facility submission (manual, before summer 2026)
@@ -385,4 +400,4 @@ a4cd868  feat(P14a): ChromaDB + LangChain RAG
 
 ---
 
-*Prompt updated: 2026-05-06 · **PORTFOLIO COMPLETO** · P1–P9f + P10 + P11a–d + P12a–f + P14a–b ✅ · Métricas manuscrito fijadas (AUROC=0.7695, numt_clean) · Pendiente: api/Docker numt_clean model, README métricas honestas, Dash dashboards, P13 (manual)*
+*Prompt updated: 2026-05-06 · **PORTFOLIO COMPLETO + NUMT-CLEAN DEPLOYED** · P1–P9f + P10 + P11a–d + P12a–f + P14a–b ✅ · Métricas manuscrito fijadas (AUROC=0.7695, numt_clean) · api v1.1 + Docker 1.1 + README honestos + Dash Pages 4-6 ✅ · Siguiente: publicar MoschouLab/ZORC en GitHub + P13 (manual)*
