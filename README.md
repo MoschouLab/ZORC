@@ -13,13 +13,16 @@ using isoform sequences, conformational ensembles (BioEmu), and IDR features (AI
 
 | Metric | Value |
 |--------|-------|
-| Test AUROC | 0.7963 |
-| Test AUPRC | 0.8431 |
-| Test F1-macro | 0.7229 |
+| Test AUROC | **0.7695** |
+| Test AUPRC | **0.8350** |
+| Test F1-macro | **0.6732** (F1-pos=0.7826, F1-neg=0.5638) |
 | HC validation | 24/25 (96%) |
 
-Final model: RandomForestClassifier (500 trees, Platt-calibrated), 63 features
-(41 RNA + 18 protein/IDR + 4 engineered).
+Metrics computed on NUMT-clean dataset (n=1,434; 68 NUMT pseudogenes removed
+from negative class — see `data/raw/2026_Pbody_NUMTcontam_REPORT_v1.md`).
+
+Final model: RandomForestClassifier (500 trees, Platt-calibrated), 61 features
+(41 RNA + 18 protein/IDR + 2 engineered).
 
 ## Pipeline phases
 
@@ -39,7 +42,7 @@ Final model: RandomForestClassifier (500 trees, Platt-calibrated), 63 features
 | P12a | MLflow experiment tracking | ✅ complete |
 | P12b | DVC data & model versioning | ✅ complete |
 | P12c | FastAPI prediction service | ✅ complete |
-| P12d | Docker image (moschoulab/zorc-predictor:1.0) | ✅ complete |
+| P12d | Docker image (moschoulab/zorc-predictor:1.1) | ✅ complete |
 | P12e | GitHub Actions CI/CD | ✅ complete |
 | P12f | EvidentlyAI drift reports + Prometheus metrics | ✅ complete |
 
@@ -122,8 +125,8 @@ uvicorn api.main:app --reload --port 8000
 Docker:
 
 ```bash
-docker pull moschoulab/zorc-predictor:1.0
-docker run -p 8000:8000 moschoulab/zorc-predictor:1.0
+docker pull moschoulab/zorc-predictor:1.1
+docker run -p 8000:8000 moschoulab/zorc-predictor:1.1
 ```
 
 ## Running tests
