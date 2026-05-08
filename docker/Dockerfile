@@ -1,4 +1,4 @@
-# ZORC P-body Prediction API — moschoulab/zorc-predictor:1.0
+# ZORC P-body Prediction API — moschoulab/zorc-predictor:1.1
 #
 # Multi-stage build required for ViennaRNA (RNAfold):
 #   - Not available in Debian apt (Bookworm or Trixie)
@@ -55,8 +55,8 @@ RUN pip install --no-cache-dir -r requirements_api.txt
 COPY api/ ./api/
 
 # Model artifact — path must match _MODEL_PATH in api/main.py
-#   _REPO_ROOT / "results" / "09d_rf_eng_model.pkl"  →  /app/results/09d_rf_eng_model.pkl
-COPY results/09d_rf_eng_model.pkl ./results/09d_rf_eng_model.pkl
+#   _REPO_ROOT / "results" / "09f_rf_final_model_numt_clean.pkl"
+COPY results/09f_rf_final_model_numt_clean.pkl ./results/09f_rf_final_model_numt_clean.pkl
 
 # SQLite database for GET /lookup/{gene_id}
 COPY data/zorc_database.db ./data/zorc_database.db

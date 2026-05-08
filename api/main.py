@@ -1,7 +1,8 @@
 """
-ZORC FastAPI Prediction Service — Phase 12c
-============================================
-Serves the P9d RandomForest model (results/09d_rf_eng_model.pkl) via HTTP.
+ZORC FastAPI Prediction Service — Phase 12c (v1.1)
+===================================================
+Serves the P9f Platt-calibrated RandomForest trained on the NUMT-clean
+dataset (results/09f_rf_final_model_numt_clean.pkl) via HTTP.
 
 Endpoints
 ---------
@@ -39,7 +40,7 @@ from api.feature_compute import compute_features
 
 _HERE       = Path(__file__).parent
 _REPO_ROOT  = _HERE.parent
-_MODEL_PATH   = _REPO_ROOT / "results" / "09d_rf_eng_model.pkl"
+_MODEL_PATH   = _REPO_ROOT / "results" / "09f_rf_final_model_numt_clean.pkl"
 _MEDIANS_PATH = _HERE / "imputation_medians.json"
 _DB_PATH      = _REPO_ROOT / "data" / "zorc_database.db"
 
@@ -56,7 +57,7 @@ _state: dict = {}
 
 
 def _load_state() -> None:
-    # Model
+    # Model (CalibratedClassifierCV wrapping a RandomForestClassifier)
     with open(_MODEL_PATH, "rb") as f:
         _state["model"] = pickle.load(f)
 
@@ -66,8 +67,9 @@ def _load_state() -> None:
     _state["feature_order"] = med_data["feature_order"]
     _state["medians"]       = med_data["medians"]   # dict {feature: value}
 
-    # SHAP explainer (TreeExplainer is fast for RF)
-    _state["explainer"] = shap.TreeExplainer(_state["model"])
+    # SHAP explainer: use inner RF (CalibratedClassifierCV wraps it)
+    inner_rf = getattr(_state["model"], "estimator", _state["model"])
+    _state["explainer"] = shap.TreeExplainer(inner_rf)
 
     n = len(_state["feature_order"])
     _model_loaded_gauge.set(1)
@@ -86,10 +88,10 @@ app = FastAPI(
     title="ZORC P-body Prediction API",
     description=(
         "Predicts P-body mRNA enrichment probability for *Arabidopsis thaliana* "
-        "transcripts using a RandomForestClassifier trained on T-RIP + APEAL "
-        "data (P1–P9d)."
+        "transcripts using a Platt-calibrated RandomForestClassifier trained on "
+        "the NUMT-clean T-RIP + APEAL dataset (P1–P9f, n=1,434 genes)."
     ),
-    version="1.0.0",
+    version="1.1.0",
     lifespan=lifespan,
 )
 
@@ -167,7 +169,7 @@ class LookupResponse(BaseModel):
     prediction:        str   = Field(..., description="'enriched' or 'not_enriched'")
     confidence:        str   = Field(..., description="'high' (≥0.75) / 'medium' (0.55–0.75) / 'low' (<0.55)")
     top_shap_features: dict[str, float] = Field(..., description="Top SHAP contributions stored in DB")
-    source:            str = "ZORC dataset (P9d model)"
+    source:            str = "ZORC dataset (P9f numt_clean model)"
 
 
 # ── Core prediction logic ─────────────────────────────────────────────────────
@@ -234,13 +236,14 @@ def _predict_one(req: PredictRequest) -> PredictResponse:
         prediction=prediction,
         confidence=confidence,
         top_features=top_features,
-        model_version="1.0.0-p9d",
+        model_version="1.1.0-p9f-numt_clean",
         imputed_features=imputed,
         disclaimer=(
-            "Prediction based on T-RIP (Liu et al. 2024 Plant Cell) training "
-            "data. Protein conformational features are median-imputed when no "
-            "protein sequence is provided. Validated on 24/25 lab-curated "
-            "high-confidence P-body genes (Arabidopsis thaliana)."
+            "Prediction based on NUMT-clean T-RIP (Liu et al. 2024 Plant Cell) "
+            "training data (1,434 genes; 68 NUMT pseudogenes removed). "
+            "Protein conformational features are median-imputed when no protein "
+            "sequence is provided. Validated on 24/25 lab-curated high-confidence "
+            "P-body genes (Arabidopsis thaliana). Test AUROC=0.7695."
         ),
     )
 
@@ -286,23 +289,25 @@ def predict_batch(req: BatchPredictRequest):
 def model_info():
     """Return metadata and training metrics for the loaded model."""
     model = _state["model"]
+    inner_rf = getattr(model, "estimator", model)
     return ModelInfoResponse(
-        model="RandomForestClassifier",
-        version="1.0.0-p9d",
-        phase="P9d (feature-engineered RF, pre-Platt calibration)",
-        n_estimators=model.n_estimators,
+        model="RandomForestClassifier (Platt-calibrated)",
+        version="1.1.0-p9f-numt_clean",
+        phase="P9f (Platt-calibrated RF, NUMT-clean dataset)",
+        n_estimators=getattr(inner_rf, "n_estimators", 500),
         n_features=model.n_features_in_,
-        feature_matrix="data/processed/08_zorc_feature_matrix_eng.csv",
-        test_auroc=0.7963,
-        test_auprc=0.8431,
-        test_f1_macro=0.7229,
+        feature_matrix="data/processed/08_zorc_feature_matrix_numt_clean.csv",
+        test_auroc=0.7695,
+        test_auprc=0.8350,
+        test_f1_macro=0.6732,
         hc_accuracy=0.96,
-        training_date="2026-04-22",
+        training_date="2026-05-06",
         note=(
-            "63 features: 41 RNA + 18 protein/IDR + 4 engineered. "
+            "61 features: 41 RNA + 18 protein/IDR + 2 engineered. "
+            "Dataset: 1,434 genes (68 NUMT pseudogenes removed from negatives). "
             "Protein features are median-imputed from the training set when "
-            "not available. "
-            "For Platt-calibrated probabilities use results/09f_rf_final_model.pkl."
+            "not available. AUROC drop vs original (0.7963) reflects removal "
+            "of trivially easy NUMT negatives — scientifically correct metric."
         ),
     )
 
