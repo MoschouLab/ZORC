@@ -1,144 +1,193 @@
-# ZORC — Zip-code Of RNAs that Condense
+# 🧬 ZORC — Zip-code Of RNAs that Condense
 
-[![CI](https://github.com/MoschouLab/ZORC/actions/workflows/ci.yml/badge.svg)](https://github.com/MoschouLab/ZORC/actions/workflows/ci.yml)
+[![CI](https://github.com/MoschouLab/ZORC/actions/workflows/ci.yml/badge.svg)](https://github.com/MoschouLab/ZORC/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.XXXXXXX-blue)](https://doi.org/10.5281/zenodo.XXXXXXX) [![Python 3.10](https://img.shields.io/badge/Python-3.10-blue)](https://www.python.org/) [![Docker](https://img.shields.io/badge/Docker-moschoulab%2Fzorc--predictor-blue)](https://hub.docker.com/r/moschoulab/zorc-predictor)
 
-Predictive ML pipeline for P-body mRNA enrichment in *Arabidopsis thaliana*,
-using isoform sequences, conformational ensembles (BioEmu), and IDR features (AIUPred).
+> **Machine learning pipeline to predict P-body coregulon membership (cognate mRNAs and proteins) in *Arabidopsis thaliana*. Part of the PLANTEX ERC Consolidator Grant — MoschouLab / IMBB-FORTH, Crete, Greece.**
 
-**Project:** ERC Consolidator Grant PLANTEX  
-**Lab:** MoschouLab, IMBB-FORTH / University of Crete  
-**Author:** José Moya-Cuevas
+---
 
-## Model performance
+## Overview
+
+Processing bodies (P-bodies) are membraneless cytoplasmic condensates that concentrate specific mRNAs and RNA-binding proteins during cellular stress responses. In plants, P-bodies play a central role in mRNA triage — sorting transcripts for storage, deadenylation, or decay — and their composition changes dynamically between normal conditions and heat stress. Identifying which mRNAs are enriched in P-bodies, and understanding the sequence features that drive their selective condensation, is key to deciphering post-transcriptional gene regulation in *Arabidopsis thaliana*.
+
+ZORC is an end-to-end machine learning pipeline that integrates three layers of molecular information to predict P-body coregulon membership: (1) isoform-level mRNA sequence features including nucleotide/dinucleotide composition, m6A motif density, UTR architecture, and RNAfold minimum free energy; (2) protein conformational ensemble dynamics computed by BioEmu v1.1 (root-mean-square fluctuation profiles, radius of gyration, contact density); and (3) intrinsically disordered region content estimated by AIUPred v2.0. The final model is a Platt-calibrated Random Forest trained on 61 features.
+
+The training dataset is derived from the T-RIP DCP1 experiment (Liu, Mentzelopoulou et al. 2024, *The Plant Cell*, DOI [10.1093/plcell/koad127](https://doi.org/10.1093/plcell/koad127)), which quantified RNA enrichment in P-bodies under normal and heat-stress conditions via affinity purification of tagged DCP1. After removing 68 pericentromeric NUMT pseudogenes that contaminated the negative class, the clean dataset comprises 1,434 *Arabidopsis* genes (888 enriched / 546 non-enriched) with a near-balanced class ratio. The anti-leakage split is performed at the CD-HIT cluster level (40% identity) to prevent paralog data leakage between train, validation, and test sets.
+
+---
+
+## Key Results
 
 | Metric | Value |
 |--------|-------|
-| Test AUROC | **0.7695** |
-| Test AUPRC | **0.8350** |
-| Test F1-macro | **0.6732** (F1-pos=0.7826, F1-neg=0.5638) |
-| HC validation | 24/25 (96%) |
+| 📈 Test AUROC | **0.7695** |
+| 📊 Test AUPRC | **0.8350** |
+| 🎯 F1-macro | **0.6732** |
+| ✅ HC validation | **24/25** (96%) |
+| 🔍 Recall (enriched class) | **0.867** |
+| 🎯 Precision (enriched class) | **0.713** |
+| 🌱 Training genes | **1,434** (NUMT-clean) |
 
-Metrics computed on NUMT-clean dataset (n=1,434; 68 NUMT pseudogenes removed
-from negative class — see `data/raw/2026_Pbody_NUMTcontam_REPORT_v1.md`).
+*NUMT-clean dataset: 68 pericentromeric pseudogenes removed from the negative class. HC validation: 25 lab-curated high-confidence P-body genes (independent of training data).*
 
-Final model: RandomForestClassifier (500 trees, Platt-calibrated), 61 features
-(41 RNA + 18 protein/IDR + 2 engineered).
+![Confusion matrix on test set](results/figures/confusion_matrix_numt_clean.png)
 
-## Pipeline phases
+*Confusion matrix on the held-out test set (n=224, NUMT-clean). The model achieves 86.7% recall on the P-body enriched class, correctly recovering the majority of positive examples while maintaining 71.3% precision.*
 
-| Phase | Script | Status |
-|-------|--------|--------|
-| P1 | `01_build_coregulon.py` | ✅ complete |
-| P2 | `02_map_isoforms.py` | ✅ complete |
-| P3 | `03_fetch_sequences.py` | ✅ complete |
-| P4 | `04_rna_features.py` | ✅ complete |
-| P5 | `05_aiupred_idr.py` | ✅ complete |
-| P6 | `06_bioemu_batch.py` | ✅ complete |
-| P7 | `07_protein_features.py` | ✅ complete |
-| P8 | `08_feature_matrix.py` | ✅ complete |
-| P9–P9f | `09_random_forest.py` … `09f_final_model.py` | ✅ complete |
-| P10 | Snakemake workflow | ✅ complete |
-| P11a–d | SQLite/DuckDB, Streamlit, Dash, Tableau CSVs prepared for import | ✅ complete |
-| P12a | MLflow experiment tracking | ✅ complete |
-| P12b | DVC data & model versioning | ✅ complete |
-| P12c | FastAPI prediction service | ✅ complete |
-| P12d | Docker image (moschoulab/zorc-predictor:1.1) | ✅ complete |
-| P12e | GitHub Actions CI/CD | ✅ complete |
-| P12f | EvidentlyAI drift reports + Prometheus metrics | ✅ complete |
+---
 
-## Monitoring
+## Pipeline Architecture
 
-### Data drift reports (EvidentlyAI)
+- 🌱 **P1 — Coregulon assembly** — Integrate T-RIP RNA enrichment (Liu et al. 2024 *Plant Cell*) with APEAL proteomics (Liu et al. 2023 *EMBO J*); define 888 positives + 546 negatives after NUMT correction
+- 🔬 **P2 — Isoform selection** — rMATS-guided splice-form assignment (303 stress-regulated isoforms) with canonical transcript fallback (1,201 genes)
+- 🧬 **P3 — Sequence extraction** — gffread extraction of isoform mRNA and protein FASTA sequences from the TAIR10 reference genome
+- 📐 **P4 — RNA feature computation** — 41 features: nucleotide/dinucleotide composition, m6A RRACH motif density, UTR length fractions, RNAfold MFE per nucleotide (max 3000 nt)
+- 🌀 **P5 — IDR annotation & BioEmu tier assignment** — AIUPred v2.0 IDR% per protein; assign Tier 1 (<10% IDR, AF2 only), Tier 2 (10–30%, 50 conformations), Tier 3 (≥30%, 100 conformations)
+- ⚛️ **P6 — BioEmu conformational sampling** — GPU-accelerated diffusion ensemble generation (1,452/1,457 proteins; RTX A5000, ~5 days); AF2 structures for Tier 1 via P6b
+- 🔧 **P7 — Protein dynamic features** — 18 features from BioEmu ensembles: N/C-terminal RMSF, radius of gyration mean/CV, contact density, pass rate, n_residues, IDR%
+- 🗂️ **P8 — Feature matrix assembly** — 1,434 × 61 feature matrix; CD-HIT 40% identity cluster-based 70/15/15 anti-leakage train/val/test split
+- 🤖 **P9–P9f — Machine learning** — Random Forest (500 trees, balanced class weights) and XGBoost comparison; feature engineering; SHAP interpretability; Platt calibration; NUMT-clean rerun
+- 🐍 **P10 — Snakemake workflow** — 15 rules with conda directives and a DAG visualisation; full pipeline reproducibility from raw data to final model
+- 📊 **P11 — Data analytics dashboards** — SQLite + DuckDB analytical backend; Streamlit prototype; 6-page Plotly Dash app (SHAP importance, probability landscape, model history); Tableau CSVs
+- 📦 **P12 — MLOps & engineering** — MLflow experiment tracking (6 retroactive runs), DVC model versioning (11 artefacts), FastAPI REST service (`/predict`, `/lookup`, `/health`), Docker Hub (`moschoulab/zorc-predictor:1.1`), GitHub Actions CI (47 tests, 86% coverage), EvidentlyAI drift reports, Prometheus `/metrics`
+- 🗺️ **P13 — Spatial validation** *(pending experimental)* — STOmics / MERFISH spatial transcriptomics of *Arabidopsis* seedlings under heat stress, combined with expansion microscopy and padlock probe validation of top ZORC candidates; facility submission before summer 2026
+- 🤖 **P14 — Generative AI agent** — ChromaDB + LangChain RAG over 10 P-body literature PDFs (1,244 vectors); LangGraph StateGraph agent with three nodes (prediction → literature retrieval → LLM report generation) and conditional routing (Claude claude-sonnet-4-6 via Anthropic SDK)
 
-```bash
-conda activate zorc_pipeline
-pip install evidently
-python scripts/10c_evidently_report.py --config config/zorc_config.yaml
-# Reports saved to monitoring/evidently_reports/
-#   drift_report.html          — feature distribution shift (train vs test)
-#   quality_report.html        — missing values, outliers, data summary
-#   classification_report.html — F1, ROC-AUC, precision/recall on test split
-```
+---
 
-### API metrics (Prometheus)
+## Repository Structure
 
-The FastAPI service exposes a `/metrics` endpoint (Prometheus text format):
+- 📁 **scripts/** — Numbered pipeline scripts P1–P9f + helper utilities (01–09f)
+- 📁 **config/** — `zorc_config.yaml` single source of truth for all parameters and paths
+- 📁 **data/**
+  - 📁 **data/raw/** — Third-party source data (gitignored; not redistributed)
+  - 📁 **data/processed/** — Pipeline outputs (CSVs, manifests; sequences and BioEmu trajectories gitignored)
+- 📁 **results/** — Model files (DVC-tracked), SHAP CSVs, prediction tables
+  - 📁 **results/figures/** — Publication figures (confusion matrix, SHAP plots)
+- 📁 **envs/** — Conda environment YAML files (`zorc_pipeline.yml`, `bioemu_ref.yml`)
+- 📁 **api/** — FastAPI prediction service (`main.py`, `feature_compute.py`, imputation medians)
+- 📁 **docker/** — Dockerfile (multi-stage, ViennaRNA from source)
+- 📁 **dashboard/** — Plotly Dash multi-page app (6 pages)
+- 📁 **notebooks/** — Jupyter analysis notebooks
+- 📁 **agent/** — LangChain RAG ingestor + LangGraph ZORC agent
+- 📁 **monitoring/** — EvidentlyAI drift reports + Prometheus config
+- 📁 **tests/** — pytest suite (47 tests, 86% API coverage)
+- 📁 **docs/** — Methodological decisions log, architecture roadmap, session prompts
+- 📁 **logs/** — Per-phase audit reports (structured text)
+- 📄 **Snakefile** — Snakemake workflow (15 rules)
+- 📄 **requirements.txt** — pip-compatible runtime dependencies
 
-```bash
-# Start the API
-uvicorn api.main:app --port 8000
+---
 
-# Scrape metrics manually
-curl http://localhost:8000/metrics | grep zorc_model_loaded
-# zorc_model_loaded 1.0
+## Quick Start
 
-# Key metrics:
-#   zorc_model_loaded              — 1 when RF model is loaded
-#   http_requests_total{handler}   — per-endpoint request counter
-#   http_request_duration_seconds  — latency histogram
-```
-
-Run Prometheus locally with the provided config:
-
-```bash
-docker run -p 9090:9090 \
-  -v $(pwd)/monitoring/prometheus_config.yml:/etc/prometheus/prometheus.yml \
-  prom/prometheus
-# Dashboard: http://localhost:9090
-```
-
-## Environments
-
-```bash
-# Main pipeline (P1–P5, P7–P9, P10)
-conda env create -f envs/zorc_pipeline.yml
-conda activate zorc_pipeline
-
-# BioEmu conformational sampling only (P6)
-conda activate bioemu
-```
-
-## Running the pipeline
-
-All scripts accept `--config config/zorc_config.yaml`. Run from project root:
-
-```bash
-python scripts/01_build_coregulon.py --config config/zorc_config.yaml
-# ... through ...
-python scripts/09f_final_model.py --config config/zorc_config.yaml
-```
-
-Or via Snakemake (P10):
-
-```bash
-snakemake --cores 4 --use-conda
-```
-
-## Prediction API
-
-```bash
-conda activate zorc_pipeline
-uvicorn api.main:app --reload --port 8000
-# Swagger UI: http://localhost:8000/docs
-```
-
-Docker:
+### 🐳 Docker (recommended)
 
 ```bash
 docker pull moschoulab/zorc-predictor:1.1
 docker run -p 8000:8000 moschoulab/zorc-predictor:1.1
+# Swagger UI: http://localhost:8000/docs
+
+# Look up a gene by AGI code
+curl http://localhost:8000/lookup/AT5G47010
+# → {"gene_id": "AT5G47010", "prob_pos": 0.93, "prediction": "enriched", "confidence": "high"}
 ```
 
-## Running tests
+### 🐍 Full pipeline (conda)
+
+```bash
+conda env create -f envs/zorc_pipeline.yml
+conda activate zorc_pipeline
+
+# Run step-by-step
+python scripts/01_build_coregulon.py --config config/zorc_config.yaml
+# ... through ...
+python scripts/09f_final_model.py --config config/zorc_config.yaml
+
+# Or run the full Snakemake workflow (P1–P9f)
+snakemake --cores 4 --use-conda
+```
+
+> **Note:** P6 (BioEmu conformational sampling) requires a CUDA GPU and the separate `bioemu` conda environment (`conda activate bioemu`). Runtime ~5 days on RTX A5000.
+
+### 🤖 LangGraph agent
+
+```bash
+conda activate zorc_pipeline
+export ANTHROPIC_API_KEY=sk-ant-...
+uvicorn api.main:app --port 8000 &  # start prediction API
+
+# Query a single gene
+python agent/run_agent.py AT5G47010
+
+# Query multiple genes
+python agent/run_agent.py AT5G47010 AT3G22270 AT1G01470
+
+# JSON output
+python agent/run_agent.py AT5G47010 --json
+```
+
+### 📊 Interactive dashboards
+
+```bash
+conda activate zorc_pipeline
+
+# Plotly Dash (6 pages: coregulon explorer, SHAP, probability landscape, etc.)
+python dashboard/dash_app.py
+# → http://localhost:8050
+
+# Streamlit prototype
+streamlit run dashboard/streamlit_app.py
+```
+
+---
+
+## Running Tests
 
 ```bash
 pip install -r requirements.txt
-pytest tests/ --cov=api
+pytest tests/ --cov=api -v
+# 47 tests, 86% coverage on api/
 ```
 
-## Reproducibility
+---
 
-Full parameter specification in `config/zorc_config.yaml`.  
-Conda environments: `envs/zorc_pipeline.yml`, `envs/bioemu_ref.yml`.  
-Data availability statement: raw data from Liu et al. 2024 (*Plant Cell*) and
-Liu et al. 2023 (*EMBO J*).
+## Data and Methods
+
+| Item | Details |
+|------|---------|
+| Input data | T-RIP DCP1 enrichment + APEAL proteomics — Liu et al. 2024 *Plant Cell* [DOI 10.1093/plcell/koad127](https://doi.org/10.1093/plcell/koad127) |
+| NUMT correction | 68 pericentromeric pseudogenes (AT2G07xxx loci) removed from the negative class; 8 ambiguous loci held out |
+| Anti-leakage splits | CD-HIT 40% sequence identity clustering; entire clusters assigned to one split (train 70% / val 15% / test 15%) |
+| Conformational sampling | BioEmu v1.1 ensembles for 1,452/1,457 proteins (Tier 2: 50 conformations; Tier 3: 100 conformations); AF2 for Tier 1 |
+| Model | RandomForestClassifier 500 trees, `class_weight="balanced"`, Platt-calibrated via `CalibratedClassifierCV` |
+| Interpretability | SHAP TreeExplainer; top features: mRNA length, CDS length, protein size, dinucleotide CG/UA, 3′UTR AU content |
+| Large files | Model `.pkl` files tracked via DVC with local remote (`/home/moschou/dvc_remote/zorc`) |
+
+---
+
+## Citation
+
+```bibtex
+@software{moya-cuevas_2026_zorc,
+  author    = {Moya-Cuevas, José and Moschou, Panagiotis N.},
+  title     = {{ZORC: Zip-code Of RNAs that Condense — ML pipeline for
+                P-body coregulon prediction in Arabidopsis thaliana}},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.XXXXXXX},
+  url       = {https://doi.org/10.5281/zenodo.XXXXXXX}
+}
+```
+
+---
+
+## Acknowledgements
+
+This work was supported by the European Research Council (ERC) Consolidator Grant **PLANTEX** awarded to **Prof. Panagiotis N. Moschou** (PI), MoschouLab, Institute of Molecular Biology and Biotechnology (IMBB-FORTH), Heraklion, Crete, Greece.
+
+---
+
+## License
+
+[MIT License](LICENSE) © 2026 José Moya-Cuevas / MoschouLab
