@@ -10,8 +10,8 @@
 **Hardware:** ThinkStation P5 (RTX A5000 25.4GB VRAM, CUDA 12.2)
 **GitHub:** owner: jomocue, organisation: MoschouLab
 **Repository:** https://github.com/MoschouLab/ZORC ✅ PUBLISHED (2026-05-22)
-**Release:** v1.0.0 — https://github.com/MoschouLab/ZORC/releases/tag/v1.0.0
-**Zenodo DOI:** pending — activate MoschouLab/ZORC on zenodo.org → GitHub settings
+**Release:** v1.0.1 — https://github.com/MoschouLab/ZORC/releases/tag/v1.0.1
+**Zenodo DOI:** 10.5281/zenodo.20342217 ✅ — https://doi.org/10.5281/zenodo.20342217
 
 ---
 
@@ -346,12 +346,29 @@ Release v1.0.0 creado vía GitHub REST API — https://github.com/MoschouLab/ZOR
 - [x] 11 archivos de modelo grandes trackeados via DVC (no subidos a git)
 - [x] MIT LICENSE 2026 José Moya-Cuevas / MoschouLab
 - [x] Push exitoso — 624 objetos
-- [x] GitHub Release v1.0.0 creado
-- [ ] **PENDIENTE:** Zenodo DOI — activar MoschouLab/ZORC en zenodo.org → Settings → GitHub
-- [ ] **PENDIENTE:** Actualizar README + BibTeX con DOI real (10.5281/zenodo.XXXXXXX → valor real)
+- [x] GitHub Release v1.0.0 + v1.0.1 creados
+- [x] Zenodo DOI asignado: **10.5281/zenodo.20342217**
+- [x] README + BibTeX actualizados con DOI real
+- [x] CI verde: Lint + Test (47/47, 85% cov) + Docker build ✅
+
+### Estado final del proyecto — COMPLETO (excepto P13)
+
+**Todo el trabajo computacional está terminado y publicado.**
+
+| Componente | Estado |
+|---|---|
+| Pipeline P1–P9f | ✅ completo |
+| Snakemake P10 | ✅ completo |
+| Dashboards P11 | ✅ completo |
+| MLOps P12 | ✅ completo |
+| LLM Agent P14 | ✅ completo |
+| GitHub público | ✅ https://github.com/MoschouLab/ZORC |
+| Zenodo DOI | ✅ 10.5281/zenodo.20342217 |
+| CI/CD | ✅ verde (Lint + Test + Docker) |
+| **P13 espacial** | ⏳ pendiente experimental (antes verano 2026) |
 
 ### Pendiente (no computacional)
-- **P13** — spatial transcriptomics validation + facility submission (manual, before summer 2026)
+- **P13** — spatial transcriptomics validation: STOmics/MERFISH + expansion microscopy + padlock probes; facility submission before summer 2026
 
 ---
 
@@ -408,8 +425,8 @@ Release v1.0.0 creado vía GitHub REST API — https://github.com/MoschouLab/ZOR
 - Every completed phase → git commit before next phase
 - All parameters in config.yaml (FAIR principle)
 - Scripts auto-add their output keys to config.yaml if missing
-- Target publication: MoschouLab/ZORC on GitHub + Zenodo DOI
+- Published: https://github.com/MoschouLab/ZORC | DOI: 10.5281/zenodo.20342217
 
 ---
 
-*Prompt updated: 2026-05-22 · **PORTFOLIO COMPLETO + GITHUB PUBLICADO** · P1–P9f + P10 + P11a–d + P12a–f + P14a–b ✅ · https://github.com/MoschouLab/ZORC ✅ · Release v1.0.0 ✅ · **Tarea pendiente: Zenodo DOI (activar en zenodo.org) + actualizar README con DOI real** · P13 spatial transcriptomics pendiente (manual)*
+*Prompt updated: 2026-05-22 · **PORTFOLIO COMPLETO + PUBLICADO EN GITHUB + ZENODO** · P1–P9f + P10 + P11a–d + P12a–f + P14a–b ✅ · https://github.com/MoschouLab/ZORC ✅ · DOI 10.5281/zenodo.20342217 ✅ · CI verde ✅ · **Solo pendiente: P13 validación espacial experimental (manual, antes verano 2026)***
