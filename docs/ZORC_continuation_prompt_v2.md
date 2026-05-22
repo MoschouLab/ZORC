@@ -8,7 +8,10 @@
 - `zorc_pipeline` — main pipeline (P1–P5, P7–P9, P10)
 - `bioemu` — BioEmu v1.1 + AIUPred v2.0, torch 2.5.1+cu121
 **Hardware:** ThinkStation P5 (RTX A5000 25.4GB VRAM, CUDA 12.2)
-**GitHub:** owner: jomocue, organisation: MoschouLab (repo not yet published — P10)
+**GitHub:** owner: jomocue, organisation: MoschouLab
+**Repository:** https://github.com/MoschouLab/ZORC ✅ PUBLISHED (2026-05-22)
+**Release:** v1.0.0 — https://github.com/MoschouLab/ZORC/releases/tag/v1.0.0
+**Zenodo DOI:** pending — activate MoschouLab/ZORC on zenodo.org → GitHub settings
 
 ---
 
@@ -321,38 +324,31 @@ aa96333  feat(dashboard): add Pages 4-6 to Dash app (numt_clean analytics)
 830d87f  fix(data): remove NUMT contaminants from feature matrix
 ```
 
-### Tarea actual — Publicar MoschouLab/ZORC en GitHub público
+### GitHub publicado ✅ — 2026-05-22
 
-**Estado:** repo local completo y limpio. Siguiente acción:
+**https://github.com/MoschouLab/ZORC** — repo público bajo MoschouLab.
 
-```bash
-# 1. Crear repositorio en GitHub (web UI o gh cli)
-gh repo create MoschouLab/ZORC --public --description \
-  "ZORC: Zip-code Of RNAs that Condense — ML pipeline for P-body mRNA enrichment in Arabidopsis thaliana"
-
-# 2. Conectar remote y hacer push
-git remote add origin https://github.com/MoschouLab/ZORC.git
-git push -u origin main
-
-# 3. Verificar GitHub Actions CI
-# .github/workflows/ci.yml ya está en el repo (47 tests, 86% cov)
-# Esperar que pasen lint + test + docker-build jobs
-# Badge CI ya está en README.md
-
-# 4. Crear release → Zenodo DOI (opcional, antes de manuscript submission)
-gh release create v1.0.0 --title "ZORC v1.0.0" \
-  --notes "Initial public release. NUMT-clean dataset. AUROC=0.7695."
+Commits de publicación (sesión 2026-05-22):
 ```
+4e4a5e2  chore: finalize .gitignore for public release
+37b5667  docs: publication-ready README with visual design and badges
+ea5e3a9  chore: add MIT License
+b873cd9  chore(dvc): track large model files via DVC
+```
+Release v1.0.0 creado vía GitHub REST API — https://github.com/MoschouLab/ZORC/releases/tag/v1.0.0
 
-**Checklist FAIR antes del push:**
+**Checklist FAIR completado:**
 - [x] Snakefile con 15 reglas y conda directives
-- [x] README.md con métricas honestas (AUROC=0.7695) + badge CI
+- [x] README.md profesional en inglés con badges, métricas, confusion matrix, BibTeX
 - [x] config/zorc_config.yaml como único entry point de parámetros
 - [x] envs/zorc_pipeline.yml + envs/bioemu_ref.yml
-- [ ] `.gitignore` revisado — confirmar que `data/raw/` y `data/processed/bioemu/` no se suben
-- [ ] `data/raw/` — comprobar que NO contiene datos de terceros redistribuibles
-- [ ] Push y verificar Actions CI (lint + test + docker-build)
-- [ ] Zenodo DOI (crear release v1.0.0)
+- [x] .gitignore finalizado (.env, *.egg-info, *.pkl, chroma_db, mlruns, etc.)
+- [x] 11 archivos de modelo grandes trackeados via DVC (no subidos a git)
+- [x] MIT LICENSE 2026 José Moya-Cuevas / MoschouLab
+- [x] Push exitoso — 624 objetos
+- [x] GitHub Release v1.0.0 creado
+- [ ] **PENDIENTE:** Zenodo DOI — activar MoschouLab/ZORC en zenodo.org → Settings → GitHub
+- [ ] **PENDIENTE:** Actualizar README + BibTeX con DOI real (10.5281/zenodo.XXXXXXX → valor real)
 
 ### Pendiente (no computacional)
 - **P13** — spatial transcriptomics validation + facility submission (manual, before summer 2026)
@@ -416,4 +412,4 @@ gh release create v1.0.0 --title "ZORC v1.0.0" \
 
 ---
 
-*Prompt updated: 2026-05-06 · **PORTFOLIO COMPLETO + NUMT-CLEAN DEPLOYED** · P1–P9f + P10 + P11a–d + P12a–f + P14a–b ✅ · api v1.1 + Docker 1.1 + README honestos + Dash Pages 4-6 ✅ · **Tarea actual: publicar MoschouLab/ZORC en GitHub público + verificar CI** · P13 spatial transcriptomics pendiente (manual)*
+*Prompt updated: 2026-05-22 · **PORTFOLIO COMPLETO + GITHUB PUBLICADO** · P1–P9f + P10 + P11a–d + P12a–f + P14a–b ✅ · https://github.com/MoschouLab/ZORC ✅ · Release v1.0.0 ✅ · **Tarea pendiente: Zenodo DOI (activar en zenodo.org) + actualizar README con DOI real** · P13 spatial transcriptomics pendiente (manual)*
