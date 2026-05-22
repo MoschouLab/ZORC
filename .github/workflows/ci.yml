@@ -60,6 +60,9 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Create model placeholder for smoke test
+        run: touch results/09f_rf_final_model_numt_clean.pkl
+
       - name: Build Docker image (no push)
         uses: docker/build-push-action@v5
         with:
