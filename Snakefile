@@ -63,6 +63,8 @@ rule all:
         "logs/09e_threshold_report.txt",
         # ── AF2 recovery (patches P7/P8 outputs for P9d–P9f) ────────────────
         "logs/09c_af2_recovery_report.txt",
+        # ── Manuscript figures ───────────────────────────────────────────────
+        "results/figures/confusion_matrix_numt_clean.pdf",
 
 
 # =============================================================================
@@ -403,3 +405,20 @@ rule final_model:
         ENV_MAIN
     shell:
         "python scripts/09f_final_model.py --config config/zorc_config.yaml"
+
+
+# =============================================================================
+# P9g — Confusion matrix figure (manuscript)
+# Generates publication-quality confusion matrix from the numt_clean test set.
+# Output: PNG (300 DPI) + PDF (vectorial) for manuscript submission.
+# =============================================================================
+rule confusion_matrix:
+    input:
+        predictions = "results/09f_predictions_final_numt_clean.csv",
+    output:
+        png = "results/figures/confusion_matrix_numt_clean.png",
+        pdf = "results/figures/confusion_matrix_numt_clean.pdf",
+    conda:
+        ENV_MAIN
+    shell:
+        "python scripts/09g_confusion_matrix.py --config config/zorc_config.yaml"
