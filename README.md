@@ -1,6 +1,6 @@
 # 🧬 ZORC — Zip-code Of RNAs that Condense
 
-[![CI](https://github.com/MoschouLab/ZORC/actions/workflows/ci.yml/badge.svg)](https://github.com/MoschouLab/ZORC/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.XXXXXXX-blue)](https://doi.org/10.5281/zenodo.XXXXXXX) [![Python 3.10](https://img.shields.io/badge/Python-3.10-blue)](https://www.python.org/) [![Docker](https://img.shields.io/badge/Docker-moschoulab%2Fzorc--predictor-blue)](https://hub.docker.com/r/moschoulab/zorc-predictor)
+[![CI](https://github.com/MoschouLab/ZORC/actions/workflows/ci.yml/badge.svg)](https://github.com/MoschouLab/ZORC/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20342217-blue)](https://doi.org/10.5281/zenodo.20342217) [![Python 3.10](https://img.shields.io/badge/Python-3.10-blue)](https://www.python.org/) [![Docker](https://img.shields.io/badge/Docker-moschoulab%2Fzorc--predictor-blue)](https://hub.docker.com/r/moschoulab/zorc-predictor)
 
 > **Machine learning pipeline to predict P-body coregulon membership (cognate mRNAs and proteins) in *Arabidopsis thaliana*. Part of the PLANTEX ERC Consolidator Grant — MoschouLab / IMBB-FORTH, Crete, Greece.**
 
@@ -175,8 +175,8 @@ pytest tests/ --cov=api -v
                 P-body coregulon prediction in Arabidopsis thaliana}},
   year      = {2026},
   publisher = {Zenodo},
-  doi       = {10.5281/zenodo.XXXXXXX},
-  url       = {https://doi.org/10.5281/zenodo.XXXXXXX}
+  doi       = {10.5281/zenodo.20342217},
+  url       = {https://doi.org/10.5281/zenodo.20342217}
 }
 ```
 
