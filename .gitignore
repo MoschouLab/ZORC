@@ -60,3 +60,15 @@ monitoring/evidently_reports/*.json
 # ChromaDB vector store (regenerable by running agent/ingest.py)
 agent/chroma_db/
 data/papers/*.pdf
+
+# Secrets / local environment
+.env
+.env.*
+
+# Python packaging artifacts
+*.egg-info/
+dist/
+build/
+
+# Model pickle files (tracked via DVC — see results/.gitignore)
+*.pkl
