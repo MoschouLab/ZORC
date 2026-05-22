@@ -1,0 +1,5 @@
+outs:
+- md5: bc72a242465453e5755d368bc00746b6
+  size: 9041240
+  hash: md5
+  path: 09f_rf_base_model_numt_clean.pkl

@@ -1,0 +1,5 @@
+outs:
+- md5: e4cc77d17cb8e1ffd85862f39d0ab7a1
+  size: 9523126
+  hash: md5
+  path: 09_zorc_rf_model_numt_clean.pkl
